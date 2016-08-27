@@ -5,4 +5,7 @@ rvm:
   - 2.3.1
 script:
   - bundle exec rake spec
-before_install: gem install bundler -v 1.12.3
+before_install:
+  - export TZ=Europe/Belgium
+  - date
+  - gem install bundler -v 1.12.3
