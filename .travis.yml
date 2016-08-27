@@ -6,6 +6,6 @@ rvm:
 script:
   - bundle exec rake spec
 before_install:
-  - export TZ=Europe/Belgium
+  - export TZ=Europe/Brussels
   - date
   - gem install bundler -v 1.12.3
