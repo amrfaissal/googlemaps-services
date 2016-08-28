@@ -1,5 +1,7 @@
 # Ruby Client for Google Maps Services
 
+[![Build Status](https://travis-ci.org/amrfaissal/googlemaps-services.svg?branch=master)](https://travis-ci.org/amrfaissal/googlemaps-services)
+
 ## Description
 
 This library brings the Google Maps API Web Services to your Ruby/RoR application.
@@ -8,6 +10,11 @@ The Ruby Client for Google Maps Services is a Ruby Client library for the follow
 
  - [Directions API]
  - [Distance Matrix API]
+
+## Requirements
+
+ - Ruby 1.9.3 or later.
+ - A Google Maps API key.
 
 ## Installation
 Add this line to your application's Gemfile:

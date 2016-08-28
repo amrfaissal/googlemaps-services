@@ -99,10 +99,6 @@ module GoogleMaps
 
         # Construct the Request URI
         uri = URI.parse(base_url + authed_url)
-        puts "===> URI: #{uri}"
-        puts "===> URI path: #{uri.path}"
-        puts "===> URI host: #{uri.host}"
-        puts "====> URI port: #{uri.port}"
 
         # Add request headers
         req = Net::HTTP::Get.new(uri.to_s)
@@ -153,12 +149,9 @@ module GoogleMaps
       end
 
       def get_body(resp)
-        puts "Response code ==> #{resp.code}"
         if resp.code.to_i != 200
           raise HTTPError.new(resp.code)
         end
-
-        puts "Response ==> #{resp.body}"
 
         body = JSON.parse(resp.body)
 
