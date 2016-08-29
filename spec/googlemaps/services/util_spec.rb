@@ -127,28 +127,55 @@ describe Convert do
       end
     end
 
-    context "given an array of locations of type String or Array" do
+    context "given an array of locations of type String or Hash" do
       it "returns a pipe separated string" do
         expect(
           Convert.piped_location(
-            ["Sydney",{ :lat => -33.865143, :lng => 151.209900}])
+            ["Sydney",{:lat => -33.865143, :lng => 151.209900}])
         ).to eql("Sydney|-33.865143,151.2099")
       end
     end
   end
 
-  describe ".join_list" do
+  describe ".join_array" do
+    it "joins the array with a separator" do
+      expect(Convert.join_array(";", [1,2,3])).to eql("1;2;3")
+    end
+  end
+
+  describe ".components" do
     context "given an argument of wrong type" do
       it "raises a TypeError exception" do
         expect {
-          Convert.join_list("|", {})
+          Convert.components([])
         }.to raise_error(TypeError)
       end
     end
 
-    context "given an argument of type Array" do
-      it "joins the array with a separator" do
-        expect(Convert.join_list(";", [1,2,3])).to eql("1;2;3")
+    context "given a hash of components" do
+      it "converts the components to server-friendly format" do
+        expect(Convert.components(
+          {"country" => ["US", "AU"], "foo" => 1})).to eql("country:AU|country:US|foo:1")
+      end
+    end
+  end
+
+  describe ".bounds" do
+    context "given an argument of wrong type" do
+      it "raises a TypeError exception" do
+        expect {
+          Convert.bounds([])
+        }.to raise_error(TypeError)
+      end
+    end
+
+    context "given a hash of bounds" do
+      it "converts lat/lng bounds to a comma- and pipe-separated string" do
+        sydney_bounds = {
+          :northeast => { :lat => -33.4245981, :lng => 151.3426361 },
+          :southwest => { :lat => -34.1692489, :lng => 150.502229  }
+        }
+        expect(Convert.bounds(sydney_bounds)).to eql("-34.1692489,150.502229|-33.4245981,151.3426361")
       end
     end
   end

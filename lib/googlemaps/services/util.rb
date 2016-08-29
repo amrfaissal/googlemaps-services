@@ -4,37 +4,26 @@ require "base64"
 require "date"
 require "erb"
 
-
 module GoogleMaps
   module Services
 
-    module ArrayExt
-      def self.included base
-        base.extend ClassMethods
-      end
-
-      module ClassMethods
-        # Wrap its argument in an array unless it is already an array
-        # or (array-like).
-        #
-        #     Array.wrap(nil)       -> []
-        #     Array.wrap([1, 2, 3]) -> [1, 2, 3]
-        #   Array.wrap(1)         -> [1]
-        #
-        def wrap(object)
-          if object.nil?
-            []
-          elsif object.respond_to? :to_ary
-            object.to_ary || [object]
-          else
-            [object]
-          end
+    class ArrayBox
+      # Wrap its argument in an array unless it is already an array
+      # or (array-like).
+      #
+      #     ArrayBox.wrap(nil)       -> []
+      #     ArrayBox.wrap([1, 2, 3]) -> [1, 2, 3]
+      #     ArrayBox.wrap(1)         -> [1]
+      #
+      def self.wrap(object)
+        if object.nil?
+          []
+        elsif object.respond_to? :to_ary
+          object.to_ary || [object]
+        else
+          [object]
         end
       end
-    end
-
-    class Array
-      include ArrayExt unless self.respond_to? :wrap
     end
 
     class Util
@@ -95,24 +84,16 @@ module GoogleMaps
         arg.to_s.chomp("0").chomp(".")
       end
 
-      # Joins a list of locations into a pipe separated string, handling
+      # Joins an array of locations into a pipe separated string, handling
       # the various formats supported for lat/lng values
       def self.piped_location(arg)
-        raise TypeError, "You called #{__method__.to_s} without arg:Array needed." unless arg.is_a? Array
-        arg.map { |location|
-          if location.is_a? String
-            location
-          elsif location.is_a? Hash
-            to_latlng(location)
-          else
-            raise TypeError, "#{__method__.to_s} expected location to be String or Hash."
-          end
-        }.join("|")
+        raise TypeError, "#{__method__.to_s} expected argument to be an Array." unless arg.instance_of? ::Array
+        arg.map { |location| to_latlng(location) }.join("|")
       end
 
       # If arg is array-like, then joins it with sep
       def self.join_array(sep, arg)
-        Array.wrap(arg).join(sep)
+        ArrayBox.wrap(arg).join(sep)
       end
 
       # Converts a Hash of components to the format expect by
@@ -121,7 +102,8 @@ module GoogleMaps
         raise TypeError, "#{__method__.to_s} expected a Hash for components." unless arg.is_a? Hash
 
         arg.map { |c, val|
-          Array.wrap(val).map {|elem| "#{c}:#{elem}"}
+          ArrayBox.wrap(val).map {|elem| "#{c}:#{elem}"}
+                            .sort_by(&:downcase)
         }.join("|")
       end
 
@@ -130,8 +112,6 @@ module GoogleMaps
         raise TypeError, "#{__method__.to_s} expected a Hash for components." unless arg.is_a? Hash
         "#{to_latlng(arg[:southwest])}|#{to_latlng(arg[:northeast])}"
       end
-
-
 
     end
 

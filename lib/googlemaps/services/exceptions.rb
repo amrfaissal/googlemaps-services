@@ -3,7 +3,7 @@ module GoogleMaps
     module Exceptions
 
       class APIError < StandardError
-        attr_reader :status
+        attr_accessor :status
 
         def initialize(status)
           self.status = status
