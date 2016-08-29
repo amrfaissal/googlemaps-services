@@ -52,7 +52,7 @@ module GoogleMaps
           end
 
           if transit_mode
-            self.params["transit_mode"] = Convert.join_list("|", transit_mode)
+            self.params["transit_mode"] = Convert.join_arrayt("|", transit_mode)
           end
 
           if transit_routing_preference

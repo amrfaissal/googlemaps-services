@@ -8,17 +8,42 @@ require "erb"
 module GoogleMaps
   module Services
 
+    module ArrayExt
+      def self.included base
+        base.extend ClassMethods
+      end
+
+      module ClassMethods
+        # Wrap its argument in an array unless it is already an array
+        # or (array-like).
+        #
+        #     Array.wrap(nil)       -> []
+        #     Array.wrap([1, 2, 3]) -> [1, 2, 3]
+        #   Array.wrap(1)         -> [1]
+        #
+        def wrap(object)
+          if object.nil?
+            []
+          elsif object.respond_to? :to_ary
+            object.to_ary || [object]
+          else
+            [object]
+          end
+        end
+      end
+    end
+
+    class Array
+      include ArrayExt unless self.respond_to? :wrap
+    end
+
     class Util
       def self.current_time
-        # Check if current context is a RoR application
-        # Reason: Rails extends the Time and DateTime objects, and includes the "current" property
+        # Returns the current time
+        # NOTE: Rails extends the Time and DateTime objects, and includes the "current" property
         # for retrieving the time the Rails environment is set to (default = UTC), as opposed to
         # the server time (Could be anything).
-        if defined?(::PhusionPassenger) || (defined?(::Thin) && defined?(::Thin::Server))
-          Time.current
-        else
-          Time.now
-        end
+        (Time.respond_to? :current) ? Time.current : Time.now
       end
 
       # Returns the current time in unix format (seconds since unix epoch)
@@ -74,7 +99,7 @@ module GoogleMaps
       # the various formats supported for lat/lng values
       def self.piped_location(arg)
         raise TypeError, "You called #{__method__.to_s} without arg:Array needed." unless arg.is_a? Array
-        arg.map! do |location|
+        arg.map { |location|
           if location.is_a? String
             location
           elsif location.is_a? Hash
@@ -82,20 +107,32 @@ module GoogleMaps
           else
             raise TypeError, "#{__method__.to_s} expected location to be String or Hash."
           end
-        end
-        arg.join("|")
+        }.join("|")
       end
 
-      # If arg is list-like, then joins it with sep.
-      def self.join_list(sep, arg)
-        if arg.is_a? String
-          [arg].join(sep)
-        elsif arg.is_a? Array
-          arg.join(sep)
-        else
-          raise TypeError, "#{__method__.to_s} expected arg to be String or Array."
-        end
+      # If arg is array-like, then joins it with sep
+      def self.join_array(sep, arg)
+        Array.wrap(arg).join(sep)
       end
+
+      # Converts a Hash of components to the format expect by
+      # the Google Maps server.
+      def self.components(arg)
+        raise TypeError, "#{__method__.to_s} expected a Hash for components." unless arg.is_a? Hash
+
+        arg.map { |c, val|
+          Array.wrap(val).map {|elem| "#{c}:#{elem}"}
+        }.join("|")
+      end
+
+      # Converts a lat/lng bounds to a comma- and pipe-separated string
+      def self.bounds(arg)
+        raise TypeError, "#{__method__.to_s} expected a Hash for components." unless arg.is_a? Hash
+        "#{to_latlng(arg[:southwest])}|#{to_latlng(arg[:northeast])}"
+      end
+
+
+
     end
 
   end

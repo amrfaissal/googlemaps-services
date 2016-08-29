@@ -37,7 +37,7 @@ module GoogleMaps
         end
 
         if avoid
-          self.params["avoid"] = Convert.join_list("|", avoid)
+          self.params["avoid"] = Convert.join_array("|", avoid)
         end
 
         if language
@@ -65,7 +65,7 @@ module GoogleMaps
         end
 
         if transit_mode
-          self.params["transit_mode"] = Convert.join_list("|", transit_mode)
+          self.params["transit_mode"] = Convert.join_array("|", transit_mode)
         end
 
         if transit_routing_preference
@@ -73,7 +73,7 @@ module GoogleMaps
         end
 
         if traffic_model
-          self.params["traffic_model"] = tra
+          self.params["traffic_model"] = traffic_model
         end
       end
 
