@@ -16,12 +16,12 @@ module GoogleMaps
       include GoogleMaps::Services::Exceptions
 
       attr_accessor :key, :timeout, :client_id, :client_secret,
-                    :channel, :retry_timeout, :requests_kwargs,
+                    :channel, :retry_timeout, :request_opts,
                     :queries_per_second, :sent_times
 
-      def initialize(key=nil, client_id=nil, client_secret=nil, timeout=nil,
-                     connect_timeout=nil, read_timeout=nil,retry_timeout=60, requests_kwargs=nil,
-                     queries_per_second=10, channel=nil)
+      def initialize(key: nil, client_id: nil, client_secret: nil, timeout: nil,
+                     connect_timeout: nil, read_timeout: nil,retry_timeout: 60, request_opts: nil,
+                     queries_per_second: 10, channel: nil)
         if !key && !(client_secret && client_id)
           raise StandardError, "Must provide API key or enterprise credentials when creationg client."
         end
@@ -59,8 +59,8 @@ module GoogleMaps
         self.client_secret = client_secret
         self.channel = channel
         self.retry_timeout = retry_timeout
-        self.requests_kwargs = requests_kwargs || {}
-        self.requests_kwargs.merge!({
+        self.request_opts = request_opts || {}
+        self.request_opts.merge!({
                                       :headers => {"User-Agent" => $USER_AGENT},
                                       :timeout => self.timeout,
                                       :verify => true
@@ -70,9 +70,9 @@ module GoogleMaps
         self.sent_times = Array.new
       end
 
-      # Performs HTTP GET request with credentials, returning the body as JSON
-      def get(url, params, first_request_time=nil, retry_counter=nil, base_url=$DEFAULT_BASE_URL,
-              accepts_clientid=true, extract_body=nil, requests_kwargs=nil)
+      # Performs HTTP GET request with credentials, returning the body as JSON or XML
+      def get(url, params, first_request_time: nil, retry_counter: nil, base_url: $DEFAULT_BASE_URL,
+              accepts_clientid: true, extract_body: nil, request_opts: nil)
         if !first_request_time
           first_request_time = Util.current_time
         end
@@ -93,16 +93,16 @@ module GoogleMaps
 
         authed_url = generate_auth_url(url, params, accepts_clientid)
 
-        # Default to the client-level self.requests_kwargs, with method-level
-        # requests_kwargs arg overriding.
-        requests_kwargs = self.requests_kwargs.merge(requests_kwargs || {})
+        # Default to the client-level self.request_opts, with method-level
+        # request_opts arg overriding.
+        request_opts = self.request_opts.merge(request_opts || {})
 
         # Construct the Request URI
         uri = URI.parse(base_url + authed_url)
 
         # Add request headers
         req = Net::HTTP::Get.new(uri.to_s)
-        requests_kwargs[:headers].each { |header,value| req.add_field(header, value) }
+        request_opts[:headers].each { |header,value| req.add_field(header, value) }
 
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = (uri.scheme == "https")

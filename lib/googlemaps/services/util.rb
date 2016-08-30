@@ -113,6 +113,10 @@ module GoogleMaps
         "#{to_latlng(arg[:southwest])}|#{to_latlng(arg[:northeast])}"
       end
 
+      def shortest_path(locations)
+        raise NotImplementedError
+      end
+
     end
 
   end
