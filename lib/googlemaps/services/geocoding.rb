@@ -7,7 +7,7 @@ module GoogleMaps
     class Geocode
       attr_accessor :client, :params
 
-      def initialize(client, address=nil, components=nil, bounds=nil, region=nil, language=nil)
+      def initialize(client, address: nil, components: nil, bounds: nil, region: nil, language: nil)
         self.client = client
         self.params = {}
 
@@ -40,7 +40,7 @@ module GoogleMaps
     class ReverseGeocode
       attr_accessor :client, :params
 
-      def initialize(client, latlng, result_type=nil, location_type=nil, language=nil)
+      def initialize(client, latlng:, result_type: nil, location_type: nil, language: nil)
         self.client = client
 
         # Check if latlng param is a place_id string.

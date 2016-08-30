@@ -8,8 +8,8 @@ module GoogleMaps
     class DistanceMatrix
       attr_accessor :client, :params
 
-      def initialize(client, origins, destinations, mode=nil, language=nil, avoid=nil, units=nil,
-          departure_time=nil, arrival_time=nil, transit_mode=nil, transit_routing_preference=nil, traffic_model=nil)
+      def initialize(client, origins:, destinations:, mode: nil, language: nil, avoid: nil, units: nil,
+          departure_time: nil, arrival_time: nil, transit_mode: nil, transit_routing_preference: nil, traffic_model: nil)
           self.client = client
 
           self.params = {

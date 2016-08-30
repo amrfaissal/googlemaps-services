@@ -7,9 +7,9 @@ module GoogleMaps
     class Directions
       attr_accessor :client, :params
 
-      def initialize(client, origin, destination, mode=nil, waypoints=nil, alternatives=false, avoid=nil,
-                     language=nil, units=nil, region=nil, departure_time=nil, arrival_time=nil, optimize_waypoints=false,
-                     transit_mode=nil, transit_routing_preference=nil, traffic_model=nil)
+      def initialize(client, origin:, destination:, mode: nil, waypoints: nil, alternatives: false, avoid: nil,
+                     language: nil, units: nil, region: nil, departure_time: nil, arrival_time: nil, optimize_waypoints: false,
+                     transit_mode: nil, transit_routing_preference: nil, traffic_model: nil)
         self.client = client
 
         self.params = {
