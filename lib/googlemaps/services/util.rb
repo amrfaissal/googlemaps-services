@@ -113,8 +113,75 @@ module GoogleMaps
         "#{to_latlng(arg[:southwest])}|#{to_latlng(arg[:northeast])}"
       end
 
-      def shortest_path(locations)
-        raise NotImplementedError
+      # Encodes an array of points into a polyline string.
+      def self.encode_polyline(points)
+        last_lat, last_lng = 0, 0
+        result = ""
+        points.each { |point|
+          lat = (point[:lat] * 1e5).round.to_i
+          lng = (point[:lng] * 1e5).round.to_i
+          delta_lat = lat - last_lat
+          delta_lng = lng - last_lng
+
+          [delta_lat, delta_lng].each { |val|
+            val = (val < 0) ? ~(val << 1) : (val << 1)
+            while val >= 0x20
+              result += ((0x20 | (val & 0x1f)) + 63).chr
+              val >>= 5
+            end
+            result += (val + 63).chr
+          }
+
+          last_lat = lat
+          last_lng = lng
+        }
+        result
+      end
+
+      # Decodes a Polyline string into a list of lat/lng hashes
+      def self.decode_polyline(polyline)
+        points = Array.new
+        index, lat, lng = 0, 0, 0
+
+        while index < polyline.length
+          result = 1
+          shift = 0
+          while true
+            b = polyline[index].ord - 63 - 1
+            index += 1
+            result += (b << shift)
+            shift += 5
+            if b < 0x1f
+              break
+            end
+          end
+          lat += (result & 1) != 0 ? (~result >> 1) : (result >> 1)
+
+          result = 1
+          shift = 0
+          while true
+            b = polyline[index].ord - 63 - 1
+            index += 1
+            result += (b << shift)
+            shift += 5
+            if b < 0x1f
+              break
+            end
+          end
+          lng += (result & 1) != 0 ? ~(result >> 1) : (result >> 1)
+
+          points.push({:lat => lat * 1e-5, :lng => lng * 1e-5})
+        end
+        points
+      end
+
+      # Returns the shortest representation of the given locations.
+      def self.shortest_path(locations)
+        raise TypeError, "#{__method__.to_s} expected an Array of locations." unless locations.is_a? Array
+
+        encoded = "enc:#{encode_polyline(locations)}"
+        unencoded = piped_location(locations)
+        encoded.length < unencoded.length ? encoded : unencoded
       end
 
     end

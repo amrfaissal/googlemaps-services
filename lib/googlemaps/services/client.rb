@@ -19,7 +19,7 @@ module GoogleMaps
                     :channel, :retry_timeout, :request_opts,
                     :queries_per_second, :sent_times
 
-      def initialize(key: nil, client_id: nil, client_secret: nil, timeout: nil,
+      def initialize(key:, client_id: nil, client_secret: nil, timeout: nil,
                      connect_timeout: nil, read_timeout: nil,retry_timeout: 60, request_opts: nil,
                      queries_per_second: 10, channel: nil)
         if !key && !(client_secret && client_id)
