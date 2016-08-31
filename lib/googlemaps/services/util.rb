@@ -35,6 +35,11 @@ module GoogleMaps
         (Time.respond_to? :current) ? Time.current : Time.now
       end
 
+      # Returns the current UTC time
+      def self.current_utctime
+        (Time.respond_to? :current) ? Time.current.utc : Time.now.utc
+      end
+
       # Returns the current time in unix format (seconds since unix epoch)
       def self.current_unix_time
         current_time.to_i

@@ -20,6 +20,12 @@ describe Util do
     end
   end
 
+  describe ".current_utctime" do
+    it "returns current UTC time" do
+      expect(Util.current_utctime).to eql(now.utc)
+    end
+  end
+
   describe ".sign_hmac" do
     secret = "AIzaBuyMirfbsiR91cw_JCDJ5Cwoocho4tZi7g"
     payload = "This is a secret message"
