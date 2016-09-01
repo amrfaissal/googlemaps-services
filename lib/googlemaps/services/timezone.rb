@@ -4,23 +4,23 @@ module GoogleMaps
   module Services
 
     class Timezone
-      attr_accessor :client, :params
+      attr_accessor :client
 
-      def initialize(client:, location:, timestamp: nil, language: nil)
+      def initialize(client)
         self.client = client
+      end
 
-        self.params = {
+      def query(location:, timestamp: nil, language: nil)
+        params = {
           "location" => Convert.to_latlng(location),
           "timestamp" => Convert.unix_time(timestamp || Util.current_utctime)
         }
 
         if language
-          self.params["language"] = language
+          params["language"] = language
         end
-      end
 
-      def get_response
-        self.client.get("/maps/api/timezone/json", self.params)
+        self.client.get(url: "/maps/api/timezone/json", params: params)
       end
     end
 

@@ -5,18 +5,21 @@ module GoogleMaps
   module Services
 
     class Elevation
-      attr_accessor :client, :params
+      attr_accessor :client
 
-      def initialize(client, locations: [], path: nil, samples: 0)
+      def initialize(client)
         self.client = client
-        self.params = {}
+      end
+
+      def query(locations: [], path: nil, samples: 0)
+        params = {}
 
         if path && locations
           raise StandardError, "Should not specify both path and locations."
         end
 
         if locations
-          self.params["locations"] = Convert.shortest_path(locations)
+          params["locations"] = Convert.shortest_path(locations)
         end
 
         if path
@@ -28,12 +31,10 @@ module GoogleMaps
             raise TypeError, "Path should be either a String or an Array."
           end
 
-          self.params = { "path" => path, "samples" => samples }
+          params = { "path" => path, "samples" => samples }
         end
-      end
 
-      def get_response
-        self.client.get("/maps/api/elevation/json", self.params)["results"]
+        self.client.get(url: "/maps/api/elevation/json", params: params)["results"]
       end
     end
 

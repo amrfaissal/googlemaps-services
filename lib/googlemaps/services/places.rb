@@ -6,22 +6,19 @@ module GoogleMaps
     class Places
       attr_accessor :client
 
-      def initialize(client:)
+      def initialize(client)
         self.client = client
       end
 
-      def search(query:, location: nil, radius: nil, language: nil,
-                    min_price: nil, max_price: nil, open_now: false, type: nil,
-                    page_token: nil)
-        places_handler(url_part: "text", query: query, location: location,
-                      radius: radius, language: language, min_price: min_price,
-                      max_price: max_price, open_now: open_now, type: type,
-                      page_token: token)
+      def search(query:, location: nil, radius: nil, language: nil, min_price: nil,
+                 max_price: nil, open_now: false, type: nil, page_token: nil)
+        _places(url_part: "text", query: query, location: location, radius: radius,
+                language: language, min_price: min_price,  max_price: max_price,
+                open_now: open_now, type: type, page_token: page_token)
       end
 
-      def nearby(location:, radius: nil, keyword: nil, language: nil,
-                      min_price: nil, max_price: nil, name: nil, open_now: false,
-                      rank_by: nil, type: nil, page_token: nil)
+      def nearby(location:, radius: nil, keyword: nil, language: nil, min_price: nil,
+                 max_price: nil, name: nil, open_now: false, rank_by: nil, type: nil, page_token: nil)
         if rank_by == "distance"
           if !(keyword || name || type)
             raise StandardError, "either a keyword, name or type arg is required when rank_by is set to distance."
@@ -30,11 +27,9 @@ module GoogleMaps
           end
         end
 
-        places_handler(url_part: "nearby", location: location,
-                       radius: radius, keyword: keyword, language: language,
-                       min_price: min_price, max_price: max_price, name: name,
-                       open_now: open_now, rank_by: rank_by, type: type,
-                       page_taken: page_taken)
+        _places(url_part: "nearby", location: location, radius: radius, keyword: keyword, language: language,
+                min_price: min_price, max_price: max_price, name: name, open_now: open_now, rank_by: rank_by,
+                type: type, page_token: page_token)
       end
 
       def radar(location:, radius:, keyword: nil, min_price: nil,
@@ -43,15 +38,15 @@ module GoogleMaps
           raise StandardError, "either a keyword, name, or type arg is required."
         end
 
-        places_handler(url_part: "radar", location: location, radius: radius,
+        _places(url_part: "radar", location: location, radius: radius,
                        keyword: keyword, min_price: min_price, max_price: max_price,
                        name: name, open_now: open_now, type: type)
       end
 
-      def places_handler(url_part:, query: nil, location: nil, radius: nil,
-                         keyword: nil, language: nil, min_price: 0, max_price: 4,
-                         name: nil, open_now: false, rank_by: nil, type: nil,
-                         page_token: nil)
+      # handler for "places", "places_nearby" and "places_radar" queries
+      def _places(url_part:, query: nil, location: nil, radius: nil, keyword: nil, language: nil,
+                  min_price: 0, max_price: 4, name: nil, open_now: false, rank_by: nil, type: nil,
+                  page_token: nil)
         params = { "minprice" => min_price, "maxprice" => max_price }
 
         if query
@@ -94,7 +89,7 @@ module GoogleMaps
           params["pagetoken"] = page_token
         end
 
-        self.client.get("/maps/api/place/#{url_part}search/json", params)
+        self.client.get(url: "/maps/api/place/#{url_part}search/json", params: params)
       end
 
 
@@ -127,18 +122,17 @@ module GoogleMaps
       end
 
 
-      def autocomplete(input_text:, offset: nil, location: nil, radius: nil,
-                      language: nil, type: nil, components: nil)
+      def autocomplete(input_text:, offset: nil, location: nil, radius: nil, language: nil, type: nil, components: nil)
         _autocomplete(url_part: "", input_text: input_text, offset: offset, location: location,
-                     radius: radius, language: language, type: type, components: components)
+                      radius: radius, language: language, type: type, components: components)
       end
 
-      def autocomplete_query(input_text:, offset: nil, location: nil, radius: nil,
-                             language: nil)
+      def autocomplete_query(input_text:, offset: nil, location: nil, radius: nil, language: nil)
         _autocomplete(url_part: "query", input_text: input_text, offset: offset,
                       location: location, radius: radius, language: language)
       end
 
+      # Handler for "autocomplete" and "autocomplete_query" queries
       def _autocomplete(url_part:, input_text:, offset: nil, location: nil,
                        radius: nil, language: nil, type: nil, components: nil)
         params = { "input" => input_text }
@@ -167,10 +161,10 @@ module GoogleMaps
           params["components"] = Convert.components(components)
         end
 
-        self.client.get("/maps/api/place/#{url_part}autocomplete/json", params)["predictions"]
+        self.client.get(url: "/maps/api/place/#{url_part}autocomplete/json", params: params)["predictions"]
       end
 
-      private :places_handler, :_autocomplete
+      private :_places, :_autocomplete
     end
   end
 end

@@ -190,7 +190,6 @@ module GoogleMaps
         unencoded = piped_location(locations)
         encoded.length < unencoded.length ? encoded : unencoded
       end
-
     end
 
   end

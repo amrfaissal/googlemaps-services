@@ -47,10 +47,7 @@ module GoogleMaps
         end
 
         if connect_timeout && read_timeout
-          self.timeout = {
-            :connect_timeout => connect_timeout,
-            :read_timeout => read_timeout
-          }
+          self.timeout = { :connect_timeout => connect_timeout, :read_timeout => read_timeout }
         else
           self.timeout = timeout
         end
@@ -71,7 +68,7 @@ module GoogleMaps
       end
 
       # Performs HTTP GET request with credentials, returning the body as JSON or XML
-      def get(url, params, first_request_time: nil, retry_counter: nil, base_url: $DEFAULT_BASE_URL,
+      def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: $DEFAULT_BASE_URL,
               accepts_clientid: true, extract_body: nil, request_opts: nil)
         if !first_request_time
           first_request_time = Util.current_time

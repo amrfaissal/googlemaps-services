@@ -5,23 +5,26 @@ module GoogleMaps
     $TRAVEL_MODES = ["driving", "walking", "bicycling", "transit"]
 
     class Directions
-      attr_accessor :client, :params
+      attr_accessor :client
 
-      def initialize(client, origin:, destination:, mode: nil, waypoints: nil, alternatives: false, avoid: nil,
-                     language: nil, units: nil, region: nil, departure_time: nil, arrival_time: nil, optimize_waypoints: false,
-                     transit_mode: nil, transit_routing_preference: nil, traffic_model: nil)
+      def initialize(client)
         self.client = client
+      end
 
-        self.params = {
+      def query(origin:, destination:, mode: nil, waypoints: nil, alternatives: false,
+                avoid: nil, language: nil, units: nil, region: nil, departure_time: nil,
+                arrival_time: nil, optimize_waypoints: false, transit_mode: nil,
+                transit_routing_preference: nil, traffic_model: nil)
+        params = {
           "origin" => Convert.to_latlng(origin),
           "destination" => Convert.to_latlng(destination)
         }
 
         if mode
           if !$TRAVEL_MODES.include? mode
-            raise StandardError, "Invalid travel mode."
+            raise StandardError, "invalid travel mode."
           end
-          self.params["mode"] = mode
+          params["mode"] = mode
         end
 
         if waypoints
@@ -29,56 +32,54 @@ module GoogleMaps
           if optimize_waypoints
             waypoints = "optimize:true|" + waypoints
           end
-          self.params["waypoints"] = waypoints
+          params["waypoints"] = waypoints
         end
 
         if alternatives
-          self.params["alternatives"] = true
+          params["alternatives"] = true
         end
 
         if avoid
-          self.params["avoid"] = Convert.join_array("|", avoid)
+          params["avoid"] = Convert.join_array("|", avoid)
         end
 
         if language
-          self.params["language"] = language
+          params["language"] = language
         end
 
         if units
-          self.params["units"] = units
+          params["units"] = units
         end
 
         if region
-          self.params["region"] = region
+          params["region"] = region
         end
 
         if departure_time
-          self.params["departure_time"] = Convert.unix_time(departure_time)
+          params["departure_time"] = Convert.unix_time(departure_time)
         end
 
         if arrival_time
-          self.params["arrival_time"] = Convert.unix_time(arrival_time)
+          params["arrival_time"] = Convert.unix_time(arrival_time)
         end
 
         if departure_time && arrival_time
-          raise StandardError, "Should not specify both departure_time and arrival_time."
+          raise StandardError, "should not specify both departure_time and arrival_time."
         end
 
         if transit_mode
-          self.params["transit_mode"] = Convert.join_array("|", transit_mode)
+          params["transit_mode"] = Convert.join_array("|", transit_mode)
         end
 
         if transit_routing_preference
-          self.params["transit_routing_preference"] = transit_routing_preference
+          params["transit_routing_preference"] = transit_routing_preference
         end
 
         if traffic_model
-          self.params["traffic_model"] = traffic_model
+          params["traffic_model"] = traffic_model
         end
-      end
 
-      def get_response
-        self.client.get("/maps/api/directions/json", self.params)["routes"]
+        self.client.get(url: "/maps/api/directions/json", params: params)["routes"]
       end
     end
 
