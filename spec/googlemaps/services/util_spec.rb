@@ -186,4 +186,36 @@ describe Convert do
     end
   end
 
+  describe ".encode_polyline" do
+    context "given an argument of wrong type" do
+      it "raises a TypeError exception" do
+        expect {
+          Convert.encode_polyline({})
+        }.to raise_error(TypeError)
+      end
+    end
+
+    context "given an array of points" do
+      it "encodes the array into a polyline string" do
+        expect(Convert.encode_polyline([{:lat=>40.714728, :lng=>-73.998672}])).to eql("abowFtzsbM")
+      end
+    end
+  end
+
+  describe ".decode_polyline" do
+    context "given an argument of wrong type" do
+      it "raises a TypeError exception" do
+        expect {
+          Convert.decode_polyline({})
+        }.to raise_error(TypeError)
+      end
+    end
+
+    context "given a polyline string" do
+      it "decodes the polyline string into an array of lat/lng hashes" do
+        expect(Convert.decode_polyline("abowFtzsbM")).to eql([{:lat=>40.71473, :lng=>-73.99867}])
+      end
+    end
+  end
+
 end

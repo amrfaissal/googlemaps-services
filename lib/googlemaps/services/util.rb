@@ -120,6 +120,7 @@ module GoogleMaps
 
       # Encodes an array of points into a polyline string.
       def self.encode_polyline(points)
+        raise TypeError, "#{__method__.to_s} expected an Array of points." unless points.is_a? Array
         last_lat, last_lng = 0, 0
         result = ""
         points.each { |point|
@@ -143,8 +144,9 @@ module GoogleMaps
         result
       end
 
-      # Decodes a Polyline string into a list of lat/lng hashes
+      # Decodes a Polyline string into an array of lat/lng hashes
       def self.decode_polyline(polyline)
+        raise TypeError, "#{__method__.to_s} expected an argument of type String." unless polyline.is_a? String
         points = Array.new
         index, lat, lng = 0, 0, 0
 
