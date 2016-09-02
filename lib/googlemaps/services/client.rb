@@ -4,20 +4,39 @@ require "googlemaps/services/util"
 require "net/http"
 require "json"
 
-
+# Core functionality, common across all API requests.
+#
+# @since 0.1.0
 module GoogleMaps
+  # Core services that connect to Google Maps API web services.
+  # @since 0.1.0
   module Services
     $USER_AGENT = "GoogleMapsRubyClient/" + VERSION
     $DEFAULT_BASE_URL = "https://maps.googleapis.com"
     $RETRIABLE_STATUSES = [500, 503, 504]
 
-    # Performs requests to the Google Maps API web services
+    # Performs requests to the Google Maps API web services.
     class GoogleClient
       include GoogleMaps::Services::Exceptions
 
-      attr_accessor :key, :timeout, :client_id, :client_secret,
-                    :channel, :retry_timeout, :request_opts,
-                    :queries_per_second, :sent_times
+      # @return [Symbol] API key. Required, unless "client_id" and "client_secret" are set.
+      attr_accessor :key
+      # @return [Symbol] timeout Combined connect and read timeout for HTTP requests, in seconds.
+      attr_accessor :timeout
+      # @return [Symbol] Client ID (for Maps API for Work).
+      attr_accessor :client_id
+      # @return [Symbol] base64-encoded client secret (for Maps API for Work).
+      attr_accessor :client_secret
+      # @return [Symbol] attribute used for tracking purposes. Can only be used with a Client ID.
+      attr_accessor :channel
+      # @return [Symbol] timeout across multiple retriable requests, in seconds.
+      attr_accessor :retry_timeout
+      # @return [Symbol] extra options for Net::HTTP client.
+      attr_accessor :request_opts
+      # @return [Symbol] number of queries per second permitted. If the rate limit is reached, the client will sleep for the appropriate amout of time before it runs the current query.
+      attr_accessor :queries_per_second
+      # @return [Symbol] keeps track of sent queries.
+      attr_accessor :sent_times
 
       def initialize(key:, client_id: nil, client_secret: nil, timeout: nil,
                      connect_timeout: nil, read_timeout: nil,retry_timeout: 60, request_opts: nil,
@@ -67,7 +86,19 @@ module GoogleMaps
         self.sent_times = Array.new
       end
 
-      # Performs HTTP GET request with credentials, returning the body as JSON or XML
+      # Performs HTTP GET requests with credentials, returning the body as JSON or XML
+      #
+      # @param [String] url URL path for the request. Should begin with a slash.
+      # @param [Hash] params HTTP GET parameters.
+      # @param [Time] first_request_time The time of the first request (nil if no retries have occurred).
+      # @param [Integer] retry_counter The number of this retry, or zero for first attempt.
+      # @param [String] base_url The base URL for the request. Defaults to the Google Maps API server. Should not have a trailing slash.
+      # @param [TrueClass, FalseClass] accepts_clientid Flag whether this call supports the client/signature params. Some APIs require API keys (e.g. Roads).
+      # @param [Proc] extract_body A function that extracts the body from the request. If the request was not successful, the function should raise a
+      #               GoogleMaps::Services::Exceptions::HTTËrror or GoogleMaps::Services::Exceptions::APIError as appropriate.
+      # @param [Hash] request_opts Additional options for the Net::HTTP client.
+      #
+      # @return [String] response body, either in JSON or XML.
       def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: $DEFAULT_BASE_URL,
               accepts_clientid: true, extract_body: nil, request_opts: nil)
         if !first_request_time
@@ -145,6 +176,13 @@ module GoogleMaps
         end
       end
 
+      # Extracts the body of the HTTP response.
+      #
+      # @private
+      #
+      # @param [Net::HTTPResponse] resp HTTP response object.
+      #
+      # @return [String] valid JSON/XML string.
       def get_body(resp)
         if resp.code.to_i != 200
           raise HTTPError.new(resp.code)
@@ -168,6 +206,15 @@ module GoogleMaps
         end
       end
 
+      # Returns the path and query string portion of the request URL, first adding any necessary parameters.
+      #
+      # @private
+      #
+      # @param [String] path The path portion of the URL.
+      # @param [Hash] params URL parameters.
+      # @param [TrueClass, FalseClass] accepts_clientid Flag whether to use a Client ID or not.
+      #
+      # @return [String] the final request path.
       def generate_auth_url(path, params={}, accepts_clientid)
         if accepts_clientid && self.client_id && self.client_secret
           if self.channel

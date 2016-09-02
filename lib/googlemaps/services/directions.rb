@@ -4,13 +4,45 @@ module GoogleMaps
   module Services
     $TRAVEL_MODES = ["driving", "walking", "bicycling", "transit"]
 
+    # Performs requests to the Google Maps Directions API.
+    #
+    # @example
+    #   directions = GoogleMaps::Services::Directions.new(client)
+    #   directions.query(origin: "Brussels", destination: "Berlin")
     class Directions
+      # @return [Symbol] The HTTP client.
       attr_accessor :client
 
       def initialize(client)
         self.client = client
       end
 
+      # Get directions between an origin point and a destination point.
+      #
+      # @param [String, Hash] origin The address or lat/lng hash value from which to calculate directions
+      # @param [String, Hash] destination The address or lat/lng value from which to calculate directions
+      # @param [String] mode The mode of transport to use when calculating directions. One of "driving",
+      #                       "walking", "bicycling" or "transit".
+      # @param [Array] waypoints Specifies an array of waypoints. Waypoints alter a route by routing it through
+      #                          the specified location(s). A location can be a String or a lat/lng hash.
+      # @param [TrueClass, FalseClass] alternatives If true, more than one route may be returned in the response.
+      # @param [Array] avoid Indicates that the calculated route(s) should avoid the indicated featues.
+      # @param [String] language The language in which to return results.
+      # @param [String] units Specifies the unit system to use when displaying results. "metric" or "imperial".
+      # @param [String] region The region code, specified as a ccTLD (top-level domain - two character value).
+      # @param [Integer, Time] departure_time Specifies the desired time of departure.
+      # @param [Integer, Time] arrival_time Specifies the desired time of arrival for transit directions.
+      #                                     Note: you cannot specify both departure_time and arrival_time.
+      # @param [TrueClass, FalseClass] optimize_waypoints optimize the provided route by rearranging the waypoints in a more efficient order.
+      # @param [Array] transit_mode Specifies one or more preferred modes of transit. This parameter may only be specified for requests where the mode is transit.
+      #                             Valid values are "bus", "subway", "train", "tram", "rail".
+      #                             "rail" is equivalent to ["train", "tram", "subway"].
+      # @param [String] transit_routing_preference Specifies preferences for transit requests. Valid values are "less_walking" or "fewer_transfers".
+      # @param [String] traffic_model Specifies the predictive travel time model to use. Valid values are "best_guess" or "optimistic" or "pessimistic".
+      #                               The traffic_model parameter may only be specified for requests where the travel mode is driving, and where the
+      #                               request includes a departure_time.
+      #
+      # @return [String] valid JSON or XML response.
       def query(origin:, destination:, mode: nil, waypoints: nil, alternatives: false,
                 avoid: nil, language: nil, units: nil, region: nil, departure_time: nil,
                 arrival_time: nil, optimize_waypoints: false, transit_mode: nil,
