@@ -6,10 +6,11 @@ require "json"
 
 # Core functionality, common across all API requests.
 #
-# @since 0.1.0
+# @since 1.0.0
 module GoogleMaps
   # Core services that connect to Google Maps API web services.
-  # @since 0.1.0
+  #
+  # @since 1.0.0
   module Services
     $USER_AGENT = "GoogleMapsRubyClient/" + VERSION
     $DEFAULT_BASE_URL = "https://maps.googleapis.com"
@@ -164,7 +165,7 @@ module GoogleMaps
         begin
           # Extract HTTP response body
           if extract_body
-            result = extract_body(resp)
+            result = extract_body.call(resp)
           else
             result = get_body(resp)
           end
@@ -195,7 +196,11 @@ module GoogleMaps
         end
 
         # Parse the response body
-        body = JSON.parse(resp.body)
+        begin
+          body = JSON.parse(resp.body)
+        rescue JSON::ParseError
+          raise APIError.new(status_code), "Received a malformed response."
+        end
 
         api_status = body["status"]
         if api_status == "OK" || api_status == "ZERO_RESULTS"

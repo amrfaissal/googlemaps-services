@@ -1,7 +1,8 @@
 module GoogleMaps
   module Services
     # Defines errors that are raised by the Google Maps client.
-    # @since 0.1.0
+    #
+    # @since 1.0.0
     module Exceptions
 
       # Represents an error raised by the remote API.
