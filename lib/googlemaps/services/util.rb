@@ -13,12 +13,11 @@ module GoogleMaps
       #
       # @param [Object] object Object to wrap.
       # @example Wrap any Object in a array
-      #   ArrayBox.wrap(nil)       -> []
-      #   ArrayBox.wrap([1, 2, 3]) -> [1, 2, 3]
-      #   ArrayBox.wrap(1)         -> [1]
+      #   ArrayBox.wrap(nil)       # []
+      #   ArrayBox.wrap([1, 2, 3]) # [1, 2, 3]
+      #   ArrayBox.wrap(1)         # [1]
       #
       # @return [Array] an array.
-      #
       def self.wrap(object)
         if object.nil?
           []
@@ -30,7 +29,7 @@ module GoogleMaps
       end
     end
 
-    # Set of utility methods
+    # Set of utility methods.
     class Util
       # Returns the current time
       #

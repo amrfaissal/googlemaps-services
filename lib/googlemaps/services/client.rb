@@ -130,6 +130,7 @@ module GoogleMaps
 
         # Add request headers
         req = Net::HTTP::Get.new(uri.to_s)
+
         request_opts[:headers].each { |header,value| req.add_field(header, value) }
 
         http = Net::HTTP.new(uri.host, uri.port)
@@ -182,12 +183,18 @@ module GoogleMaps
       #
       # @param [Net::HTTPResponse] resp HTTP response object.
       #
-      # @return [String] valid JSON/XML string.
+      # @return [Hash] Valid JSON/XML response.
       def get_body(resp)
+        status_code = resp.code.to_i
+        if status_code >= 300 && status_code < 400
+          return resp["location"]
+        end
+
         if resp.code.to_i != 200
           raise HTTPError.new(resp.code)
         end
 
+        # Parse the response body
         body = JSON.parse(resp.body)
 
         api_status = body["status"]

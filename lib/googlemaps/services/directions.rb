@@ -8,7 +8,7 @@ module GoogleMaps
     #
     # @example
     #   directions = GoogleMaps::Services::Directions.new(client)
-    #   directions.query(origin: "Brussels", destination: "Berlin")
+    #   result = directions.query(origin: "Brussels", destination: {:lat => 52.520645, :lng => 13.409779})
     class Directions
       # @return [Symbol] The HTTP client.
       attr_accessor :client
@@ -42,7 +42,7 @@ module GoogleMaps
       #                               The traffic_model parameter may only be specified for requests where the travel mode is driving, and where the
       #                               request includes a departure_time.
       #
-      # @return [String] valid JSON or XML response.
+      # @return [Hash] Valid JSON or XML response.
       def query(origin:, destination:, mode: nil, waypoints: nil, alternatives: false,
                 avoid: nil, language: nil, units: nil, region: nil, departure_time: nil,
                 arrival_time: nil, optimize_waypoints: false, transit_mode: nil,

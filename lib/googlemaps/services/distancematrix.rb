@@ -5,13 +5,38 @@ module GoogleMaps
 
     $AVOIDS = ["tolls", "highways", "ferries"]
 
+    # Performs requests to the Google Maps Distance Matrix API.
+    #
+    # @example
+    #   distancematrix = GoogleMaps::Services::DistanceMatrix(client)
+    #   result = distancematrix.query(origins: ["Brussels", "Ghent"], destinations: ["Bruges"])
     class DistanceMatrix
+      # @return [Symbol] the HTTP client.
       attr_accessor :client
 
       def initialize(client)
         self.client = client
       end
 
+      # Gets travel distance and time for a matrix of origins and destinations.
+      #
+      # @param [Array] origins One or more locations and/or lat/lng values, from which to calculate distance and time.
+      #                 If you pass an address as a string, the service will geocode the string and convert it to a lat/lng coordinate to calculate directions.
+      # @param [Array] destinations One or more addresses and/or lat/lng values, to which to calculate distance and time.
+      #                             If you pass an address as a string, the service will geocode the string and convert it to a lat/lng coordinate to calculate directions.
+      # @param [String] mode Specifies the mode of transport to use when calculating directions. Valid values are "driving", "walking", "transit" or "bicycling".
+      # @param [String] language The language in which to return results.
+      # @param [String] avoid Indicates that the calculated route(s) should avoid the indicated features. Valid values are "tolls", "highways" or "ferries".
+      # @param [String] units Specifies the unit system to use when displaying results. Valid values are "metric" or "imperial".
+      # @param [Integer, Time, Date] departure_time Specifies the desired time of departure.
+      # @param [Integer, Time, Date] arrival_time Specifies the desired time of arrival for transit directions. Note: you can't specify both departure_time and arrival_time.
+      # @param [Array] transit_mode Specifies one or more preferred modes of transit. his parameter may only be specified for requests where the mode is transit.
+      #                             Valid values are "bus", "subway", "train", "tram", "rail". "rail" is equivalent to ["train", "tram", "subway"].
+      # @param [String] transit_routing_preference Specifies preferences for transit requests. Valid values are "less_walking" or "fewer_transfers".
+      # @param [String] traffic_model Specifies the predictive travel time model to use. Valid values are "best_guess" or "optimistic" or "pessimistic".
+      #                               The traffic_model parameter may only be specified for requests where the travel mode is driving, and where the request includes a departure_time.
+      #
+      # @return [Hash] Matrix of distances.
       def query(origins:, destinations:, mode: nil, language: nil, avoid: nil,
                 units: nil, departure_time: nil, arrival_time: nil, transit_mode: nil,
                 transit_routing_preference: nil, traffic_model: nil)
