@@ -99,7 +99,7 @@ module GoogleMaps
       #               GoogleMaps::Services::Exceptions::HTTËrror or GoogleMaps::Services::Exceptions::APIError as appropriate.
       # @param [Hash] request_opts Additional options for the Net::HTTP client.
       #
-      # @return [String] response body, either in JSON or XML.
+      # @return [Hash, Array] response body, either in JSON or XML.
       def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: $DEFAULT_BASE_URL,
               accepts_clientid: true, extract_body: nil, request_opts: nil)
         if !first_request_time
@@ -136,15 +136,15 @@ module GoogleMaps
 
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = (uri.scheme == "https")
-        # get responses
+        # Get HTTP response
         resp = http.request(req)
 
         # Handle response errors
         case resp
         when Net::HTTPRequestTimeOut
           raise Timeout
-        #else
-        #  raise TransportError, "HTTP GET request failed."
+        when Exception
+          raise TransportError, "HTTP GET request failed."
         end
 
         if $RETRIABLE_STATUSES.include? resp.code.to_i
@@ -167,7 +167,7 @@ module GoogleMaps
           if extract_body
             result = extract_body.call(resp)
           else
-            result = get_body(resp)
+            result = get_json_body(resp)
           end
           self.sent_times.push(Util.current_time)
           return result
@@ -178,14 +178,14 @@ module GoogleMaps
         end
       end
 
-      # Extracts the body of the HTTP response.
+      # Extracts the JSON body of the HTTP response.
       #
       # @private
       #
       # @param [Net::HTTPResponse] resp HTTP response object.
       #
-      # @return [Hash] Valid JSON/XML response.
-      def get_body(resp)
+      # @return [Hash, Array] Valid JSON response.
+      def get_json_body(resp)
         status_code = resp.code.to_i
         if status_code >= 300 && status_code < 400
           return resp["location"]
@@ -198,7 +198,7 @@ module GoogleMaps
         # Parse the response body
         begin
           body = JSON.parse(resp.body)
-        rescue JSON::ParseError
+        rescue JSON::ParserError
           raise APIError.new(status_code), "Received a malformed response."
         end
 
@@ -247,7 +247,7 @@ module GoogleMaps
         raise StandardError, "Must provide API key for this API. It does not accept enterprise credentials."
       end
 
-      private :get_body, :generate_auth_url
+      private :get_json_body, :generate_auth_url
     end
 
   end
