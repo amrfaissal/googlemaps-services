@@ -7,6 +7,16 @@ require "erb"
 module GoogleMaps
   module Services
 
+    module HashDot
+      def method_missing(meth, *args, &block)
+        if has_key?(meth.to_s)
+          self[meth.to_s]
+        else
+          raise NoMethodError, 'undefined method #{meth} for #{self}'
+        end
+      end
+    end
+
     # Performs Array boxing.
     class ArrayBox
       # Wrap its argument in an array unless it is already an array or (array-like).
