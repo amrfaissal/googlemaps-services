@@ -16,7 +16,7 @@ module GoogleMaps
         status_code = resp.code.to_i
         begin
           body = JSON.parse(resp.body)
-        rescue JSON::ParseError
+        rescue JSON::ParserError
           raise APIError.new(status_code), "Received malformed response."
         end
 
