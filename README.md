@@ -10,13 +10,20 @@ The Ruby Client for Google Maps Services is a Ruby Client library for the follow
 
  - [Directions API]
  - [Distance Matrix API]
+ - [Elevation API]
+ - [Geocoding API]
+ - [Time Zone API]
+ - [Roads API]
+ - [Places API]
 
 ## Requirements
 
- - Ruby 1.9.3 or later.
+ - Ruby 2.2 or later.
  - A Google Maps API key.
+ - Client ID and Client Secret (for Google Maps APIs Premium Plan customers).
 
 ## Installation
+
 Add this line to your application's Gemfile:
 
 ```ruby
@@ -37,11 +44,27 @@ $ gem install googlemaps-services
 
 ## Documentation
 
-TODO
+View the [reference documentation](http://www.rubydoc.info/gems/googlemaps-services).
 
 ## Usage
 
-TODO
+This example uses the [Directions API] with an API key:
+
+```ruby
+  require "googlemaps/services/client"
+  require "googlemaps/services/directions"
+
+  include GoogleMaps::Services
+
+  client = GoogleClient.new(key: "Add API key here")
+  directions = Directions.new(client)
+
+  # Get directions via public transit
+  result = directions.query(origin: "75 9th Ave, New York, NY", destination: "MetLife Stadium Dr East Rutherford, NJ 07073",
+                            mode: "transit", departure_time: Time.now)
+```
+
+For more usage examples, check out the [reference documentation](http://www.rubydoc.info/gems/googlemaps-services).
 
 ## Contributing
 
@@ -53,3 +76,8 @@ The gem is available as open source under the terms of the [MIT License](http://
 
 [Directions API]: https://developers.google.com/maps/documentation/directions/
 [Distance Matrix API]: https://developers.google.com/maps/documentation/distancematrix/
+[Elevation API]: https://developers.google.com/maps/documentation/elevation/
+[Geocoding API]: https://developers.google.com/maps/documentation/geocoding/
+[Time Zone API]: https://developers.google.com/maps/documentation/timezone/
+[Roads API]: https://developers.google.com/maps/documentation/roads/
+[Places API]: https://developers.google.com/places/
