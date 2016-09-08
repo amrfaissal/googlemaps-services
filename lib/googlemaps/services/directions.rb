@@ -111,7 +111,12 @@ module GoogleMaps
           params["traffic_model"] = traffic_model
         end
 
-        self.client.get(url: "/maps/api/directions/json", params: params)["routes"]
+        case self.client.response_format
+        when :xml
+          self.client.get(url: "/maps/api/directions/xml", params: params)
+        else
+          self.client.get(url: "/maps/api/directions/json", params: params)["routes"]
+        end
       end
     end
 

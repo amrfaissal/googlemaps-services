@@ -38,6 +38,8 @@ module GoogleMaps
       attr_accessor :queries_per_second
       # @return [Symbol] keeps track of sent queries.
       attr_accessor :sent_times
+      # @return [Symbol] Response format. Either :json or :xml
+      attr_accessor :response_format
 
       def initialize(key:, client_id: nil, client_secret: nil, timeout: nil,
                      connect_timeout: nil, read_timeout: nil,retry_timeout: 60, request_opts: nil,
@@ -85,6 +87,9 @@ module GoogleMaps
 
         self.queries_per_second = queries_per_second
         self.sent_times = Array.new
+
+        self.response_format = :json if !self.response_format
+        raise StandardError, "Unsupported response format. Should be either :json or :xml." unless [:json, :xml].include? self.response_format
       end
 
       # Performs HTTP GET requests with credentials, returning the body as JSON or XML
@@ -167,7 +172,12 @@ module GoogleMaps
           if extract_body
             result = extract_body.call(resp)
           else
-            result = get_json_body(resp)
+            case self.response_format
+            when :xml # XML response
+              result = get_xml_body(resp)
+            else # JSON response
+              result = get_json_body(resp)
+            end
           end
           self.sent_times.push(Util.current_time)
           return result
@@ -218,6 +228,24 @@ module GoogleMaps
         end
       end
 
+      # Extracts the XML body of the HTTP response.
+      #
+      # @private
+      #
+      # @param [Net::HTTPResponse] resp HTTP response object.
+      #
+      # @return [Object] Valid XML object
+      def get_xml_body(resp)
+        status_code = resp.code.to_i
+        if status_code >= 300 && status_code < 400
+          return resp["location"]
+        end
+
+        if resp.code.to_i != 200
+          raise HTTPError.new(resp.code)
+        end
+      end
+
       # Returns the path and query string portion of the request URL, first adding any necessary parameters.
       #
       # @private
@@ -247,7 +275,7 @@ module GoogleMaps
         raise StandardError, "Must provide API key for this API. It does not accept enterprise credentials."
       end
 
-      private :get_json_body, :generate_auth_url
+      private :get_json_body, :get_xml_body, :generate_auth_url
     end
 
   end
