@@ -16,6 +16,8 @@ The Ruby Client for Google Maps Services is a Ruby Client library for the follow
  - [Roads API]
  - [Places API]
 
+It supports both JSON and XML response formats.
+
 ## Requirements
 
  - Ruby 2.2 or later.
@@ -56,10 +58,11 @@ This example uses the [Directions API] with an API key:
 
   include GoogleMaps::Services
 
-  client = GoogleClient.new(key: "Add API key here")
+  client = GoogleClient.new(key: "Add API key here", response_format: :json)
   directions = Directions.new(client)
 
-  # Get directions via public transit
+  # Get directions via public transit in JSON format
+  # To return the result in XML format, change the Client response_format parameter to :xml
   result = directions.query(origin: "75 9th Ave, New York, NY", destination: "MetLife Stadium Dr East Rutherford, NJ 07073",
                             mode: "transit", departure_time: Time.now)
 ```
