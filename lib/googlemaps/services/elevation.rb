@@ -24,7 +24,7 @@ module GoogleMaps
       # @param [String, Array] path An encoded polyline string, or an Array of lat/lng values from which to calculate elevation data.
       # @param [Integer] samples The number of sample points along a path for which to return elevation data.
       #
-      # @return [String] Valid JSON or XML response.
+      # @return [Array, Nokogiri::XML::NodeSet] Valid JSON or XML response.
       def query(locations: [], path: nil, samples: 0)
         params = {}
 
@@ -48,7 +48,12 @@ module GoogleMaps
           params = { "path" => path, "samples" => samples }
         end
 
-        self.client.get(url: "/maps/api/elevation/json", params: params)["results"]
+        case self.client.response_format
+        when :xml
+          self.client.get(url: "/maps/api/elevation/xml", params: params).xpath("//result")
+        else
+          self.client.get(url: "/maps/api/elevation/json", params: params)["results"]
+        end
       end
     end
 

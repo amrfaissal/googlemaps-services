@@ -36,7 +36,7 @@ module GoogleMaps
       # @param [String] traffic_model Specifies the predictive travel time model to use. Valid values are "best_guess" or "optimistic" or "pessimistic".
       #                               The traffic_model parameter may only be specified for requests where the travel mode is driving, and where the request includes a departure_time.
       #
-      # @return [Hash] Matrix of distances.
+      # @return [Hash, Nokogiri::XML::Document] Matrix of distances.
       def query(origins:, destinations:, mode: nil, language: nil, avoid: nil,
                 units: nil, departure_time: nil, arrival_time: nil, transit_mode: nil,
                 transit_routing_preference: nil, traffic_model: nil)
@@ -91,7 +91,7 @@ module GoogleMaps
           params["traffic_model"] = traffic_model
         end
 
-        self.client.get(url: "/maps/api/distancematrix/json", params: params)
+        self.client.get(url: "/maps/api/distancematrix/#{self.client.response_format}", params: params).class
       end
     end
   end

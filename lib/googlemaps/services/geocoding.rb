@@ -29,7 +29,7 @@ module GoogleMaps
       # @param [String] region The region code, specified as a ccTLD ("top-level domain") two-character value.
       # @param [String] language The language in which to return results.
       #
-      # @return [String] Valid JSON or XML response.
+      # @return [Array, Nokogiri::XML::NodeSet] Valid JSON or XML response.
       def query(address: nil, components: nil, bounds: nil, region: nil, language: nil)
         params = {}
 
@@ -53,7 +53,12 @@ module GoogleMaps
           params["language"] = language
         end
 
-        self.client.get(url: "/maps/api/geocode/json", params: params)["results"]
+        case self.client.response_format
+        when :xml
+          self.client.get(url: "/maps/api/geocode/xml", params: params).xpath("//result")
+        else
+          self.client.get(url: "/maps/api/geocode/json", params: params)["results"]
+        end
       end
     end
 
@@ -98,7 +103,12 @@ module GoogleMaps
           params["language"] = language
         end
 
-        self.client.get(url: "/maps/api/geocode/json", params: params)["results"]
+        case self.client.response_format
+        when :xml
+          self.client.get(url: "/maps/api/geocode/xml", params: params).xpath("//result")
+        else
+          self.client.get(url: "/maps/api/geocode/json", params: params)["results"]
+        end
       end
     end
 

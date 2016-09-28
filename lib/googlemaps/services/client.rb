@@ -1,6 +1,7 @@
 require "googlemaps/services/exceptions"
 require "googlemaps/services/version"
 require "googlemaps/services/util"
+require "nokogiri"
 require "net/http"
 require "json"
 
@@ -43,7 +44,7 @@ module GoogleMaps
 
       def initialize(key:, client_id: nil, client_secret: nil, timeout: nil,
                      connect_timeout: nil, read_timeout: nil,retry_timeout: 60, request_opts: nil,
-                     queries_per_second: 10, channel: nil)
+                     queries_per_second: 10, channel: nil, response_format: :json)
         if !key && !(client_secret && client_id)
           raise StandardError, "Must provide API key or enterprise credentials when creationg client."
         end
@@ -88,8 +89,10 @@ module GoogleMaps
         self.queries_per_second = queries_per_second
         self.sent_times = Array.new
 
-        self.response_format = :json if !self.response_format
-        raise StandardError, "Unsupported response format. Should be either :json or :xml." unless [:json, :xml].include? self.response_format
+        if response_format
+          raise StandardError, "Unsupported response format. Should be either :json or :xml." unless [:json, :xml].include? response_format
+          self.response_format = response_format
+        end
       end
 
       # Performs HTTP GET requests with credentials, returning the body as JSON or XML
@@ -201,7 +204,7 @@ module GoogleMaps
           return resp["location"]
         end
 
-        if resp.code.to_i != 200
+        if status_code != 200
           raise HTTPError.new(resp.code)
         end
 
@@ -209,7 +212,7 @@ module GoogleMaps
         begin
           body = JSON.parse(resp.body)
         rescue JSON::ParserError
-          raise APIError.new(status_code), "Received a malformed response."
+          raise APIError.new(status_code), "Received a malformed JSON response."
         end
 
         api_status = body["status"]
@@ -234,15 +237,37 @@ module GoogleMaps
       #
       # @param [Net::HTTPResponse] resp HTTP response object.
       #
-      # @return [Object] Valid XML object
+      # @return [Nokogiri::XML::Document] Valid XML document.
       def get_xml_body(resp)
         status_code = resp.code.to_i
         if status_code >= 300 && status_code < 400
           return resp["location"]
         end
 
-        if resp.code.to_i != 200
+        if status_code != 200
           raise HTTPError.new(resp.code)
+        end
+
+        begin
+          doc = Nokogiri::XML.parse(resp.body)
+        rescue
+          raise APIError.new(status_code), "Received a malformed XML response."
+        end
+
+        api_status = doc.xpath("//status").first.text
+        if api_status == "OK" || api_status == "ZERO_RESULTS"
+          return doc
+        end
+
+        if api_status == "OVER_QUERY_LIMIT"
+          raise RetriableRequest
+        end
+
+        error_message = doc.xpath("//error_message")
+        if error_message
+          raise APIError.new(api_status), error_message.text
+        else
+          raise APIError.new(api_status)
         end
       end
 

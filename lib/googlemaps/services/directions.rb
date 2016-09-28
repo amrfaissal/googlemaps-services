@@ -42,7 +42,7 @@ module GoogleMaps
       #                               The traffic_model parameter may only be specified for requests where the travel mode is driving, and where the
       #                               request includes a departure_time.
       #
-      # @return [Hash] Valid JSON or XML response.
+      # @return [Array, Nokogiri::XML::NodeSet] Valid JSON or XML response.
       def query(origin:, destination:, mode: nil, waypoints: nil, alternatives: false,
                 avoid: nil, language: nil, units: nil, region: nil, departure_time: nil,
                 arrival_time: nil, optimize_waypoints: false, transit_mode: nil,
@@ -113,7 +113,7 @@ module GoogleMaps
 
         case self.client.response_format
         when :xml
-          self.client.get(url: "/maps/api/directions/xml", params: params)
+          self.client.get(url: "/maps/api/directions/xml", params: params).xpath("//route")
         else
           self.client.get(url: "/maps/api/directions/json", params: params)["routes"]
         end

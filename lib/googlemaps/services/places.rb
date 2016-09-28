@@ -24,7 +24,7 @@ module GoogleMaps
       # @param [String] type Restricts the results to places matching the specified type. The full list of supported types is available here: https://developers.google.com/places/supported_types
       # @param [String] page_token Token from a previous search that when provided will returns the next page of results for the same search.
       #
-      # @return [Hash] Valid JSON or XML response.
+      # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def search(query:, location: nil, radius: nil, language: nil, min_price: nil,
                  max_price: nil, open_now: false, type: nil, page_token: nil)
         _places(url_part: "text", query: query, location: location, radius: radius,
@@ -46,7 +46,7 @@ module GoogleMaps
       # @param [String] type Restricts the results to places matching the specified type. The full list of supported types is available here: https://developers.google.com/places/supported_types
       # @param [String] page_token Token from a previous search that when provided will returns the next page of results for the same search.
       #
-      # @return [Hash] Valid JSON or XML response.
+      # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def nearby(location:, radius: nil, keyword: nil, language: nil, min_price: nil,
                  max_price: nil, name: nil, open_now: false, rank_by: nil, type: nil, page_token: nil)
         if rank_by == "distance"
@@ -73,7 +73,7 @@ module GoogleMaps
       # @param [TrueClass, FalseClass] open_now Return only those places that are open for business at the time the query is sent.
       # @param [String] type: Restricts the results to places matching the specified type. The full list of supported types is available here: https://developers.google.com/places/supported_types
       #
-      # @return [Hash] Valid JSON or XML response.
+      # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def radar(location:, radius:, keyword: nil, min_price: nil,
                      max_price: nil, name: nil, open_now: false, type: nil)
         if !(keyword || name || type)
@@ -132,7 +132,7 @@ module GoogleMaps
           params["pagetoken"] = page_token
         end
 
-        self.client.get(url: "/maps/api/place/#{url_part}search/json", params: params)
+        self.client.get(url: "/maps/api/place/#{url_part}search/#{self.client.response_format}", params: params)
       end
 
 
@@ -141,14 +141,14 @@ module GoogleMaps
       # @param [String] place_id A textual identifier that uniquely identifies a place, returned from a Places search.
       # @param [String] language The language in which to return results.
       #
-      # @return [Hash] Valid JSON or XML response.
+      # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def place_details(place_id:, language: nil)
         params = { "placeid" => place_id }
         if language
           params["language"] = language
         end
 
-        self.client.get(url: "/maps/api/place/details/json", params: params)
+        self.client.get(url: "/maps/api/place/details/#{self.client.response_format}", params: params)
       end
 
       # Downloads a photo from the Places API.
@@ -186,7 +186,7 @@ module GoogleMaps
       # @param [String] type Restricts the results to places matching the specified type. The full list of supported types is available here: https://developers.google.com/places/web-service/autocomplete#place_types
       # @param [Hash] components A component filter for which you wish to obtain a geocode, e.g. "{'administrative_area': 'TX','country': 'US'}"
       #
-      # @return [Array] Array of predictions.
+      # @return [Array, Nokogiri::XML::NodeSet] Array of predictions.
       def autocomplete(input_text:, offset: nil, location: nil, radius: nil, language: nil, type: nil, components: nil)
         _autocomplete(url_part: "", input_text: input_text, offset: offset, location: location,
                       radius: radius, language: language, type: type, components: components)
@@ -200,7 +200,7 @@ module GoogleMaps
       # @param [Integer] radius Distance in meters within which to bias results.
       # @param [String] language The language in which to return results.
       #
-      # @return [Array] Array of predictions.
+      # @return [Array, Nokogiri::XML::NodeSet] Array of predictions.
       def autocomplete_query(input_text:, offset: nil, location: nil, radius: nil, language: nil)
         _autocomplete(url_part: "query", input_text: input_text, offset: offset,
                       location: location, radius: radius, language: language)
@@ -236,7 +236,12 @@ module GoogleMaps
           params["components"] = Convert.components(components)
         end
 
-        self.client.get(url: "/maps/api/place/#{url_part}autocomplete/json", params: params)["predictions"]
+        case self.client.response_format
+        when :xml
+          self.client.get(url: "/maps/api/place/#{url_part}autocomplete/xml", params: params).xpath("//prediction")
+        else
+          self.client.get(url: "/maps/api/place/#{url_part}autocomplete/json", params: params)["predictions"]
+        end
       end
 
       private :_places, :_autocomplete
