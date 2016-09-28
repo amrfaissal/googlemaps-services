@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["amr.faissal@gmail.com"]
 
   spec.summary       = %q{Ruby Client library for Google Maps API Web Services}
-  spec.description   = %q{This library brings the Google Maps API Web Services to your Ruby/RoR application}
+  spec.description   = %q{This library brings the Google Maps API Web Services to your Ruby/RoR application. It supports both JSON and XML response formats.}
   spec.homepage      = "https://amrfaissal.github.io/googlemaps-services"
   spec.license       = "MIT"
 
