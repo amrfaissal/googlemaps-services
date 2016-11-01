@@ -1,4 +1,4 @@
-require "googlemaps/services/util"
+require 'googlemaps/services/util'
 
 module GoogleMaps
   module Services
@@ -27,12 +27,12 @@ module GoogleMaps
       # @return [Hash] Valid JSON or XML response.
       def query(location:, timestamp: nil, language: nil)
         params = {
-          "location" => Convert.to_latlng(location),
-          "timestamp" => Convert.unix_time(timestamp || Util.current_utctime)
+            'location' => Convert.to_latlng(location),
+            'timestamp' => Convert.unix_time(timestamp || Util.current_utctime)
         }
 
         if language
-          params["language"] = language
+          params['language'] = language
         end
 
         self.client.get(url: "/maps/api/timezone/#{self.client.response_format}", params: params)

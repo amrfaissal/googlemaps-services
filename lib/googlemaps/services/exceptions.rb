@@ -42,7 +42,7 @@ module GoogleMaps
         #
         # @return [String] Human-readable error string.
         def to_s
-          "The request timed out."
+          'The request timed out.'
         end
       end
 

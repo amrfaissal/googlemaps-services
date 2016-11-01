@@ -1,11 +1,10 @@
-require "googlemaps/services/exceptions"
-require "googlemaps/services/util"
-require "json"
+require 'googlemaps/services/exceptions'
+require 'googlemaps/services/util'
+require 'json'
 
 module GoogleMaps
   module Services
-
-    $ROADS_BASE_URL = "https://roads.googleapis.com"
+    ROADS_BASE_URL = 'https://roads.googleapis.com'
 
     # Performs requests to the Google Maps Roads API.
     class Roads
@@ -17,19 +16,19 @@ module GoogleMaps
         begin
           body = JSON.parse(resp.body)
         rescue JSON::ParserError
-          raise APIError.new(status_code), "Received malformed response."
+          raise APIError.new(status_code), 'Received malformed response.'
         end
 
-        if body.key?("error")
-          error = body["error"]
-          status = error["status"]
+        if body.key?('error')
+          error = body['error']
+          status = error['status']
 
-          if status == "RESOURCE_EXHAUSTED"
+          if status == 'RESOURCE_EXHAUSTED'
             raise RetriableRequest
           end
 
-          if error.key?("message")
-            raise APIError.new(status), error["message"]
+          if error.key?('message')
+            raise APIError.new(status), error['message']
           else
             raise APIError.new(status)
           end
@@ -59,14 +58,14 @@ module GoogleMaps
       #
       # @return [Array] Array of snapped points.
       def snap_to_roads(path:, interpolate: false)
-        params = { "path" => Convert.piped_location(path) }
+        params = {'path' => Convert.piped_location(path) }
 
         if interpolate
-          params["interpolate"] = "true"
+          params['interpolate'] = 'true'
         end
 
-        self.client.get(url: "/v1/snapToRoads", params: params, base_url: $ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: @@_roads_extract)["snappedPoints"]
+        self.client.get(url: '/v1/snapToRoads', params: params, base_url: ROADS_BASE_URL,
+                        accepts_clientid: false, extract_body: @@_roads_extract)['snappedPoints']
       end
 
       # Returns the posted speed limit (in km/h) for given road segments.
@@ -78,10 +77,10 @@ module GoogleMaps
       def speed_limits(place_ids:)
         raise StandardError, "#{__method__.to_s} expected an Array for place_ids." unless place_ids.is_a? Array
 
-        params = { "placeId" => place_ids }
+        params = {'placeId' => place_ids}
 
-        self.client.get(url: "/v1/speedLimits", params: params, base_url: $ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: @@_roads_extract)["speedLimits"]
+        self.client.get(url: '/v1/speedLimits', params: params, base_url: ROADS_BASE_URL,
+                        accepts_clientid: false, extract_body: @@_roads_extract)['speedLimits']
       end
 
       # Returns the posted speed limit (in km/h) for given road segments.
@@ -91,9 +90,9 @@ module GoogleMaps
       #
       # @return [Hash] Hash with an array of speed limits and an array of the snapped points.
       def snapped_speed_limits(path:)
-        params = { "path" => Convert.piped_location(path) }
+        params = {'path' => Convert.piped_location(path)}
 
-        self.client.get(url: "/v1/speedLimits", params: params, base_url: $ROADS_BASE_URL,
+        self.client.get(url: '/v1/speedLimits', params: params, base_url: ROADS_BASE_URL,
                         accepts_clientid: false, extract_body: @@_roads_extract)
       end
 
@@ -105,11 +104,12 @@ module GoogleMaps
       #
       # @return [Array] An array of snapped points.
       def nearest_roads(points:)
-        params = { "points" => Convert.piped_location(points) }
+        params = {'points' => Convert.piped_location(points)}
 
-        self.client.get(url: "/v1/nearestRoads", params: params, base_url: $ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: @@_roads_extract)["snappedPoints"]
+        self.client.get(url: '/v1/nearestRoads', params: params, base_url: ROADS_BASE_URL,
+                        accepts_clientid: false, extract_body: @@_roads_extract)['snappedPoints']
       end
     end
+
   end
 end

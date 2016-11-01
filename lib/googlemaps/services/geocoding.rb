@@ -1,4 +1,4 @@
-require "googlemaps/services/util"
+require 'googlemaps/services/util'
 
 
 module GoogleMaps
@@ -34,30 +34,30 @@ module GoogleMaps
         params = {}
 
         if address
-          params["address"] = address
+          params['address'] = address
         end
 
         if components
-          params["components"] = Convert.components(components)
+          params['components'] = Convert.components(components)
         end
 
         if bounds
-          params["bounds"] = Convert.bounds(bounds)
+          params['bounds'] = Convert.bounds(bounds)
         end
 
         if region
-          params["region"] = region
+          params['region'] = region
         end
 
         if language
-          params["language"] = language
+          params['language'] = language
         end
 
         case self.client.response_format
         when :xml
-          self.client.get(url: "/maps/api/geocode/xml", params: params).xpath("//result")
+          self.client.get(url: '/maps/api/geocode/xml', params: params).xpath('//result')
         else
-          self.client.get(url: "/maps/api/geocode/json", params: params)["results"]
+          self.client.get(url: '/maps/api/geocode/json', params: params)['results']
         end
       end
     end
@@ -86,28 +86,28 @@ module GoogleMaps
         # Check if latlng param is a place_id string.
         # 'place_id' strings do not contain commas; latlng strings do.
         if latlng.is_a?(String) && !latlng.include?("'")
-          params = {"place_id" => latlng}
+          params = {'place_id' => latlng}
         else
-          params = {"latlng" => Convert.to_latlng(latlng)}
+          params = {'latlng' => Convert.to_latlng(latlng)}
         end
 
         if result_type
-          params["result_type"] = Convert.join_array("|", result_type)
+          params['result_type'] = Convert.join_array('|', result_type)
         end
 
         if location_type
-          params["location_type"] = Convert.join_array("|", location_type)
+          params['location_type'] = Convert.join_array('|', location_type)
         end
 
         if language
-          params["language"] = language
+          params['language'] = language
         end
 
         case self.client.response_format
         when :xml
-          self.client.get(url: "/maps/api/geocode/xml", params: params).xpath("//result")
+          self.client.get(url: '/maps/api/geocode/xml', params: params).xpath('//result')
         else
-          self.client.get(url: "/maps/api/geocode/json", params: params)["results"]
+          self.client.get(url: '/maps/api/geocode/json', params: params)['results']
         end
       end
     end

@@ -1,4 +1,4 @@
-require "googlemaps/services/util"
+require 'googlemaps/services/util'
 
 module GoogleMaps
   module Services
@@ -27,8 +27,8 @@ module GoogleMaps
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def search(query:, location: nil, radius: nil, language: nil, min_price: nil,
                  max_price: nil, open_now: false, type: nil, page_token: nil)
-        _places(url_part: "text", query: query, location: location, radius: radius,
-                language: language, min_price: min_price,  max_price: max_price,
+        _places(url_part: 'text', query: query, location: location, radius: radius,
+                language: language, min_price: min_price, max_price: max_price,
                 open_now: open_now, type: type, page_token: page_token)
       end
 
@@ -49,15 +49,15 @@ module GoogleMaps
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def nearby(location:, radius: nil, keyword: nil, language: nil, min_price: nil,
                  max_price: nil, name: nil, open_now: false, rank_by: nil, type: nil, page_token: nil)
-        if rank_by == "distance"
+        if rank_by == 'distance'
           if !(keyword || name || type)
-            raise StandardError, "either a keyword, name or type arg is required when rank_by is set to distance."
+            raise StandardError, 'either a keyword, name or type arg is required when rank_by is set to distance.'
           elsif radius
-            raise StandardError, "radius cannot be specified when rank_by is set to distance."
+            raise StandardError, 'radius cannot be specified when rank_by is set to distance.'
           end
         end
 
-        _places(url_part: "nearby", location: location, radius: radius, keyword: keyword, language: language,
+        _places(url_part: 'nearby', location: location, radius: radius, keyword: keyword, language: language,
                 min_price: min_price, max_price: max_price, name: name, open_now: open_now, rank_by: rank_by,
                 type: type, page_token: page_token)
       end
@@ -76,13 +76,13 @@ module GoogleMaps
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def radar(location:, radius:, keyword: nil, min_price: nil,
                      max_price: nil, name: nil, open_now: false, type: nil)
-        if !(keyword || name || type)
-          raise StandardError, "either a keyword, name, or type arg is required."
+        unless keyword || name || type
+          raise StandardError, 'either a keyword, name, or type arg is required.'
         end
 
-        _places(url_part: "radar", location: location, radius: radius,
-                       keyword: keyword, min_price: min_price, max_price: max_price,
-                       name: name, open_now: open_now, type: type)
+        _places(url_part: 'radar', location: location, radius: radius,
+                keyword: keyword, min_price: min_price, max_price: max_price,
+                name: name, open_now: open_now, type: type)
       end
 
       # Handler for "places", "places_nearby" and "places_radar" queries.
@@ -90,51 +90,50 @@ module GoogleMaps
       def _places(url_part:, query: nil, location: nil, radius: nil, keyword: nil, language: nil,
                   min_price: 0, max_price: 4, name: nil, open_now: false, rank_by: nil, type: nil,
                   page_token: nil)
-        params = { "minprice" => min_price, "maxprice" => max_price }
+        params = {'minprice' => min_price, 'maxprice' => max_price }
 
         if query
-          params["query"] = query
+          params['query'] = query
         end
 
         if location
-          params["location"] = Convert.to_latlng(location)
+          params['location'] = Convert.to_latlng(location)
         end
 
         if radius
-          params["radius"] = radius
+          params['radius'] = radius
         end
 
         if keyword
-          params["keyword"] = keyword
+          params['keyword'] = keyword
         end
 
         if language
-          params["language"] = language
+          params['language'] = language
         end
 
         if name
-          params["name"] = Convert.join_array(" ", name)
+          params['name'] = Convert.join_array(' ', name)
         end
 
         if open_now
-          params["opennow"] = "true"
+          params['opennow'] = 'true'
         end
 
         if rank_by
-          params["rankby"] = rank_by
+          params['rankby'] = rank_by
         end
 
         if type
-          params["type"] = type
+          params['type'] = type
         end
 
         if page_token
-          params["pagetoken"] = page_token
+          params['pagetoken'] = page_token
         end
 
         self.client.get(url: "/maps/api/place/#{url_part}search/#{self.client.response_format}", params: params)
       end
-
 
       # Comprehensive details for an individual place.
       #
@@ -143,9 +142,9 @@ module GoogleMaps
       #
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def place_details(place_id:, language: nil)
-        params = { "placeid" => place_id }
+        params = {'placeid' => place_id }
         if language
-          params["language"] = language
+          params['language'] = language
         end
 
         self.client.get(url: "/maps/api/place/details/#{self.client.response_format}", params: params)
@@ -159,21 +158,21 @@ module GoogleMaps
       #
       # @return [String] URL of the photo.
       def place_photo(photo_reference:, max_width: nil, max_height: nil)
-        if !(max_width || max_height)
-          raise StandardError, "a max_width or max_height arg is required"
+        unless max_width || max_height
+          raise StandardError, 'a max_width or max_height arg is required'
         end
 
-        params = {"photoreference" => photo_reference}
+        params = {'photoreference' => photo_reference}
 
         if max_width
-          params["maxwidth"] = max_width
+          params['maxwidth'] = max_width
         end
 
         if max_height
-          params["maxheight"] = max_height
+          params['maxheight'] = max_height
         end
 
-        self.client.get(url: "/maps/api/place/photo", params: params)
+        self.client.get(url: '/maps/api/place/photo', params: params)
       end
 
       # Returns Place predictions given a textual search string and optional geographic bounds.
@@ -202,7 +201,7 @@ module GoogleMaps
       #
       # @return [Array, Nokogiri::XML::NodeSet] Array of predictions.
       def autocomplete_query(input_text:, offset: nil, location: nil, radius: nil, language: nil)
-        _autocomplete(url_part: "query", input_text: input_text, offset: offset,
+        _autocomplete(url_part: 'query', input_text: input_text, offset: offset,
                       location: location, radius: radius, language: language)
       end
 
@@ -210,37 +209,37 @@ module GoogleMaps
       # @private
       def _autocomplete(url_part:, input_text:, offset: nil, location: nil,
                        radius: nil, language: nil, type: nil, components: nil)
-        params = { "input" => input_text }
+        params = {'input' => input_text }
 
         if offset
-          params["offset"] = offset
+          params['offset'] = offset
         end
 
         if location
-          params["location"] = Convert.to_latlng(location)
+          params['location'] = Convert.to_latlng(location)
         end
 
         if radius
-          params["radius"] = radius
+          params['radius'] = radius
         end
 
         if language
-          params["language"] = language
+          params['language'] = language
         end
 
         if type
-          params["type"] = type
+          params['type'] = type
         end
 
         if components
-          params["components"] = Convert.components(components)
+          params['components'] = Convert.components(components)
         end
 
         case self.client.response_format
         when :xml
-          self.client.get(url: "/maps/api/place/#{url_part}autocomplete/xml", params: params).xpath("//prediction")
+          self.client.get(url: "/maps/api/place/#{url_part}autocomplete/xml", params: params).xpath('//prediction')
         else
-          self.client.get(url: "/maps/api/place/#{url_part}autocomplete/json", params: params)["predictions"]
+          self.client.get(url: "/maps/api/place/#{url_part}autocomplete/json", params: params)['predictions']
         end
       end
 

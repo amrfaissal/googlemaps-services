@@ -1,4 +1,4 @@
-require "googlemaps/services/util"
+require 'googlemaps/services/util'
 
 
 module GoogleMaps
@@ -29,30 +29,31 @@ module GoogleMaps
         params = {}
 
         if path && locations
-          raise StandardError, "Should not specify both path and locations."
+          raise StandardError, 'Should not specify both path and locations.'
         end
 
         if locations
-          params["locations"] = Convert.shortest_path(locations)
+          params['locations'] = Convert.shortest_path(locations)
         end
 
         if path
-          if path.is_a? String
+          case path.class
+          when String
             path = "enc:#{path}"
-          elsif path.is_a? Array
+          when Array
             path = Convert.shortest_path(path)
           else
-            raise TypeError, "Path should be either a String or an Array."
+            raise TypeError, 'Path should be either a String or an Array.'
           end
 
-          params = { "path" => path, "samples" => samples }
+          params = {'path' => path, 'samples' => samples }
         end
 
         case self.client.response_format
         when :xml
-          self.client.get(url: "/maps/api/elevation/xml", params: params).xpath("//result")
+          self.client.get(url: '/maps/api/elevation/xml', params: params).xpath('//result')
         else
-          self.client.get(url: "/maps/api/elevation/json", params: params)["results"]
+          self.client.get(url: '/maps/api/elevation/json', params: params)['results']
         end
       end
     end

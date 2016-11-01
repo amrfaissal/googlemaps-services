@@ -1,9 +1,9 @@
-require "googlemaps/services/exceptions"
-require "googlemaps/services/version"
-require "googlemaps/services/util"
-require "nokogiri"
-require "net/http"
-require "json"
+require 'googlemaps/services/exceptions'
+require 'googlemaps/services/version'
+require 'googlemaps/services/util'
+require 'nokogiri'
+require 'net/http'
+require 'json'
 
 # Core functionality, common across all API requests.
 #
@@ -13,9 +13,9 @@ module GoogleMaps
   #
   # @since 1.0.0
   module Services
-    $USER_AGENT = "GoogleMapsRubyClient/" + VERSION
-    $DEFAULT_BASE_URL = "https://maps.googleapis.com"
-    $RETRIABLE_STATUSES = [500, 503, 504]
+    USER_AGENT = 'GoogleMapsRubyClient/' + VERSION
+    DEFAULT_BASE_URL = 'https://maps.googleapis.com'
+    RETRIABLE_STATUSES = [500, 503, 504]
 
     # Performs requests to the Google Maps API web services.
     class GoogleClient
@@ -43,30 +43,30 @@ module GoogleMaps
       attr_accessor :response_format
 
       def initialize(key:, client_id: nil, client_secret: nil, timeout: nil,
-                     connect_timeout: nil, read_timeout: nil,retry_timeout: 60, request_opts: nil,
+                     connect_timeout: nil, read_timeout: nil,retry_timeout: 60, request_opts: {},
                      queries_per_second: 10, channel: nil, response_format: :json)
         if !key && !(client_secret && client_id)
-          raise StandardError, "Must provide API key or enterprise credentials when creationg client."
+          raise StandardError, 'Must provide API key or enterprise credentials when creationg client.'
         end
 
-        if key && !key.start_with?("AIza")
-          raise StandardError, "Invalid API key provided."
+        if key && !key.start_with?('AIza')
+          raise StandardError, 'Invalid API key provided.'
         end
 
         if channel
-          if !client_id
-            raise StandardError, "The channel argument must be used with a client ID."
+          unless client_id
+            raise StandardError, 'The channel argument must be used with a client ID.'
           end
 
-          if !/^[a-zA-Z0-9._-]*$/.match(channel)
-            raise StandardError, "The channel argument must be an ASCII alphanumeric string. The period (.), underscore (_) and hyphen (-) characters are allowed."
+          unless /^[a-zA-Z0-9._-]*$/.match(channel)
+            raise StandardError, 'The channel argument must be an ASCII alphanumeric string. The period (.), underscore (_) and hyphen (-) characters are allowed.'
           end
         end
 
         self.key = key
 
         if timeout && (connect_timeout || read_timeout)
-          raise StandardError, "Specify either timeout, or connect_timeout and read_timeout."
+          raise StandardError, 'Specify either timeout, or connect_timeout and read_timeout.'
         end
 
         if connect_timeout && read_timeout
@@ -79,18 +79,16 @@ module GoogleMaps
         self.client_secret = client_secret
         self.channel = channel
         self.retry_timeout = retry_timeout
-        self.request_opts = request_opts || {}
-        self.request_opts.merge!({
-                                      :headers => {"User-Agent" => $USER_AGENT},
-                                      :timeout => self.timeout,
-                                      :verify => true
-                                    })
-
+        self.request_opts = request_opts.merge({
+                                                   :headers => {'User-Agent' => USER_AGENT},
+                                                   :timeout => self.timeout,
+                                                   :verify => true
+                                               })
         self.queries_per_second = queries_per_second
         self.sent_times = Array.new
 
         if response_format
-          raise StandardError, "Unsupported response format. Should be either :json or :xml." unless [:json, :xml].include? response_format
+          raise StandardError, 'Unsupported response format. Should be either :json or :xml.' unless [:json, :xml].include? response_format
           self.response_format = response_format
         end
       end
@@ -108,9 +106,9 @@ module GoogleMaps
       # @param [Hash] request_opts Additional options for the Net::HTTP client.
       #
       # @return [Hash, Array] response body, either in JSON or XML.
-      def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: $DEFAULT_BASE_URL,
+      def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: DEFAULT_BASE_URL,
               accepts_clientid: true, extract_body: nil, request_opts: nil)
-        if !first_request_time
+        unless first_request_time
           first_request_time = Util.current_time
         end
 
@@ -125,7 +123,7 @@ module GoogleMaps
           # at 1, so subtract that first.
           delay_seconds = 0.5 * 1.5 ** (retry_counter - 1)
           # Jitter this value by 50% and pause.
-          sleep(delay_seconds * (random.random() + 0.5))
+          sleep(delay_seconds * (random.random + 0.5))
         end
 
         authed_url = generate_auth_url(url, params, accepts_clientid)
@@ -143,7 +141,7 @@ module GoogleMaps
         request_opts[:headers].each { |header,value| req.add_field(header, value) }
 
         http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = (uri.scheme == "https")
+        http.use_ssl = (uri.scheme == 'https')
         # Get HTTP response
         resp = http.request(req)
 
@@ -152,10 +150,10 @@ module GoogleMaps
         when Net::HTTPRequestTimeOut
           raise Timeout
         when Exception
-          raise TransportError, "HTTP GET request failed."
+          raise TransportError, 'HTTP GET request failed.'
         end
 
-        if $RETRIABLE_STATUSES.include? resp.code.to_i
+        if RETRIABLE_STATUSES.include? resp.code.to_i
           # Retry request
           self.get(url, params, first_request_time, retry_counter + 1,
                    base_url, accepts_clientid, extract_body)
@@ -185,9 +183,8 @@ module GoogleMaps
           self.sent_times.push(Util.current_time)
           return result
         rescue RetriableRequest
-          # retry request
-          return self.get(url, params, first_request_time, retry_counter + 1,
-                          base_url, accepts_clientid, extract_body)
+          # Retry request
+          return self.get(url, params, first_request_time, retry_counter + 1, base_url, accepts_clientid, extract_body)
         end
       end
 
@@ -201,7 +198,7 @@ module GoogleMaps
       def get_json_body(resp)
         status_code = resp.code.to_i
         if status_code >= 300 && status_code < 400
-          return resp["location"]
+          return resp['location']
         end
 
         if status_code != 200
@@ -212,20 +209,20 @@ module GoogleMaps
         begin
           body = JSON.parse(resp.body)
         rescue JSON::ParserError
-          raise APIError.new(status_code), "Received a malformed JSON response."
+          raise APIError.new(status_code), 'Received a malformed JSON response.'
         end
 
-        api_status = body["status"]
-        if api_status == "OK" || api_status == "ZERO_RESULTS"
+        api_status = body['status']
+        if api_status == 'OK' || api_status == 'ZERO_RESULTS'
           return body
         end
 
-        if api_status == "OVER_QUERY_LIMIT"
+        if api_status == 'OVER_QUERY_LIMIT'
           raise RetriableRequest
         end
 
-        if body.key?("error_message")
-          raise APIError.new(api_status), body["error_message"]
+        if body.key?('error_message')
+          raise APIError.new(api_status), body['error_message']
         else
           raise APIError.new(api_status)
         end
@@ -241,7 +238,7 @@ module GoogleMaps
       def get_xml_body(resp)
         status_code = resp.code.to_i
         if status_code >= 300 && status_code < 400
-          return resp["location"]
+          return resp['location']
         end
 
         if status_code != 200
@@ -251,19 +248,19 @@ module GoogleMaps
         begin
           doc = Nokogiri::XML.parse(resp.body)
         rescue
-          raise APIError.new(status_code), "Received a malformed XML response."
+          raise APIError.new(status_code), 'Received a malformed XML response.'
         end
 
-        api_status = doc.xpath("//status").first.text
-        if api_status == "OK" || api_status == "ZERO_RESULTS"
+        api_status = doc.xpath('//status').first.text
+        if api_status == 'OK' || api_status == 'ZERO_RESULTS'
           return doc
         end
 
-        if api_status == "OVER_QUERY_LIMIT"
+        if api_status == 'OVER_QUERY_LIMIT'
           raise RetriableRequest
         end
 
-        error_message = doc.xpath("//error_message")
+        error_message = doc.xpath('//error_message')
         if error_message
           raise APIError.new(api_status), error_message.text
         else
@@ -283,21 +280,21 @@ module GoogleMaps
       def generate_auth_url(path, params={}, accepts_clientid)
         if accepts_clientid && self.client_id && self.client_secret
           if self.channel
-            params["channel"] = self.channel
+            params['channel'] = self.channel
           end
-          params["client"] = self.client_id
+          params['client'] = self.client_id
 
-          path = [path, Util.urlencode_params(params)].join("?")
+          path = [path, Util.urlencode_params(params)].join('?')
           sig = Util.sign_hmac(self.client_secret, path)
-          return path + "&signature=" + sig
+          return path + '&signature=' + sig
         end
 
         if self.key
-          params["key"] = self.key
-          return path + "?" + Util.urlencode_params(params)
+          params['key'] = self.key
+          return path + '?' + Util.urlencode_params(params)
         end
 
-        raise StandardError, "Must provide API key for this API. It does not accept enterprise credentials."
+        raise StandardError, 'Must provide API key for this API. It does not accept enterprise credentials.'
       end
 
       private :get_json_body, :get_xml_body, :generate_auth_url
