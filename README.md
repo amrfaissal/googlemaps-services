@@ -20,7 +20,7 @@ It supports both JSON and XML response formats.
 
 ## Requirements
 
- - Ruby 2.2 or later.
+ - Ruby 2.1 or later.
  - A Google Maps API key.
  - Client ID and Client Secret (for Google Maps APIs Premium Plan customers).
 
@@ -53,18 +53,20 @@ View the [reference documentation](http://www.rubydoc.info/gems/googlemaps-servi
 This example uses the [Directions API] with an API key:
 
 ```ruby
-  require "googlemaps/services/client"
-  require "googlemaps/services/directions"
+  require 'googlemaps/services/client'
+  require 'googlemaps/services/directions'
 
   include GoogleMaps::Services
 
-  client = GoogleClient.new(key: "Add API key here", response_format: :json)
+  client = GoogleClient.new(key: 'Add API key here', response_format: :json)
   directions = Directions.new(client)
 
   # Get directions via public transit in JSON format
   # To return the result in XML format, change the Client response_format parameter to :xml
-  result = directions.query(origin: "75 9th Ave, New York, NY", destination: "MetLife Stadium Dr East Rutherford, NJ 07073",
-                            mode: "transit", departure_time: Time.now)
+  result = directions.query(origin: '75 9th Ave, New York, NY', destination: 'MetLife Stadium Dr East Rutherford, NJ 07073',
+                            mode: 'transit', departure_time: Time.now)
+  # Print the result
+  puts result
 ```
 
 For more usage examples, check out the [reference documentation](http://www.rubydoc.info/gems/googlemaps-services).
