@@ -1,8 +1,8 @@
-require "net/http"
-require "openssl"
-require "base64"
-require "date"
-require "erb"
+require 'net/http'
+require 'openssl'
+require 'base64'
+require 'date'
+require 'erb'
 
 module GoogleMaps
   module Services
@@ -12,7 +12,7 @@ module GoogleMaps
         if has_key?(meth.to_s)
           self[meth.to_s]
         else
-          raise NoMethodError, 'undefined method #{meth} for #{self}'
+          raise NoMethodError, "undefined method #{meth} for #{self}"
         end
       end
     end
@@ -102,11 +102,12 @@ module GoogleMaps
       #
       # @return [String] seconds since unix epoch.
       def self.unix_time(val)
-        if val.is_a? Integer
+        case val
+        when Integer
           val.to_s
-        elsif val.is_a? Time
+        when Time
           val.to_i.to_s
-        elsif val.is_a? Date
+        when Date
           val.to_time.to_i.to_s
         else
           raise TypeError, "#{__method__.to_s} expected value to be Integer, Time or Date."
@@ -123,9 +124,10 @@ module GoogleMaps
       #
       # @return [String] comma-separated string.
       def self.to_latlng(arg)
-        if arg.is_a? String
+        case arg
+        when String
           arg
-        elsif arg.is_a? Hash
+        when Hash
           "#{self.format_float(arg[:lat])},#{self.format_float(arg[:lng])}"
         else
           raise TypeError, "#{__method__.to_s} expected location to be String or Hash."
@@ -140,7 +142,7 @@ module GoogleMaps
       #
       # @return [String] formatted value of lat or lng float
       def self.format_float(arg)
-        arg.to_s.chomp("0").chomp(".")
+        arg.to_s.chomp('0').chomp('.')
       end
 
       # Joins an array of locations into a pipe separated string, handling
@@ -153,8 +155,8 @@ module GoogleMaps
       #
       # @return [String] pipe-separated string.
       def self.piped_location(arg)
-        raise TypeError, "#{__method__.to_s} expected argument to be an Array." unless arg.instance_of? ::Array
-        arg.map { |location| to_latlng(location) }.join("|")
+        raise TypeError, "#{__method__.to_s} expected argument to be an Array." unless arg.instance_of? Array
+        arg.map { |location| to_latlng(location) }.join('|')
       end
 
       # If arg is array-like, then joins it with sep
@@ -179,9 +181,8 @@ module GoogleMaps
         raise TypeError, "#{__method__.to_s} expected a Hash of components." unless arg.is_a? Hash
 
         arg.map { |c, val|
-          ArrayBox.wrap(val).map {|elem| "#{c}:#{elem}"}
-                            .sort_by(&:downcase)
-        }.join("|")
+          ArrayBox.wrap(val).map {|elem| "#{c}:#{elem}"}.sort_by(&:downcase)
+        }.join('|')
       end
 
       # Converts a lat/lng bounds to a comma- and pipe-separated string.
@@ -212,7 +213,7 @@ module GoogleMaps
       def self.encode_polyline(points)
         raise TypeError, "#{__method__.to_s} expected an Array of points." unless points.is_a? Array
         last_lat, last_lng = 0, 0
-        result = ""
+        result = ''
         points.each { |point|
           lat = (point[:lat] * 1e5).round.to_i
           lng = (point[:lng] * 1e5).round.to_i
