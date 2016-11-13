@@ -1,6 +1,7 @@
 # Ruby Client for Google Maps Services
 
 [![Build Status](https://travis-ci.org/amrfaissal/googlemaps-services.svg?branch=master)](https://travis-ci.org/amrfaissal/googlemaps-services)
+![](http://ruby-gem-downloads-badge.herokuapp.com/googlemaps-services?type=total)
 
 ## Description
 
