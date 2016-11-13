@@ -31,7 +31,8 @@
         <h1>
 <a id="ruby-client-for-google-maps-services" class="anchor" href="#ruby-client-for-google-maps-services" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Ruby Client for Google Maps Services</h1>
 
-<p><a href="https://travis-ci.org/amrfaissal/googlemaps-services"><img src="https://travis-ci.org/amrfaissal/googlemaps-services.svg?branch=master" alt="Build Status"></a></p>
+<p><a href="https://travis-ci.org/amrfaissal/googlemaps-services"><img src="https://travis-ci.org/amrfaissal/googlemaps-services.svg?branch=master" alt="Build Status"></a>
+<img src="http://ruby-gem-downloads-badge.herokuapp.com/googlemaps-services?type=total" alt=""></p>
 
 <h2>
 <a id="description" class="anchor" href="#description" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Description</h2>
@@ -56,7 +57,7 @@
 <a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Requirements</h2>
 
 <ul>
-<li>Ruby 2.2 or later.</li>
+<li>Ruby 2.1 or later.</li>
 <li>A Google Maps API key.</li>
 <li>Client ID and Client Secret (for Google Maps APIs Premium Plan customers).</li>
 </ul>
@@ -86,18 +87,20 @@
 
 <p>This example uses the <a href="https://developers.google.com/maps/documentation/directions/">Directions API</a> with an API key:</p>
 
-<div class="highlight highlight-source-ruby"><pre>  <span class="pl-k">require</span> <span class="pl-s"><span class="pl-pds">"</span>googlemaps/services/client<span class="pl-pds">"</span></span>
-  <span class="pl-k">require</span> <span class="pl-s"><span class="pl-pds">"</span>googlemaps/services/directions<span class="pl-pds">"</span></span>
+<div class="highlight highlight-source-ruby"><pre>  <span class="pl-k">require</span> <span class="pl-s"><span class="pl-pds">'</span>googlemaps/services/client<span class="pl-pds">'</span></span>
+  <span class="pl-k">require</span> <span class="pl-s"><span class="pl-pds">'</span>googlemaps/services/directions<span class="pl-pds">'</span></span>
 
   <span class="pl-k">include</span> <span class="pl-c1">GoogleMaps</span>::<span class="pl-c1">Services</span>
 
-  client <span class="pl-k">=</span> <span class="pl-c1">GoogleClient</span>.<span class="pl-k">new</span>(<span class="pl-c1">key:</span> <span class="pl-s"><span class="pl-pds">"</span>Add API key here<span class="pl-pds">"</span></span>, <span class="pl-c1">response_format:</span> <span class="pl-c1">:json</span>)
+  client <span class="pl-k">=</span> <span class="pl-c1">GoogleClient</span>.<span class="pl-k">new</span>(<span class="pl-c1">key:</span> <span class="pl-s"><span class="pl-pds">'</span>Add API key here<span class="pl-pds">'</span></span>, <span class="pl-c1">response_format:</span> <span class="pl-c1">:json</span>)
   directions <span class="pl-k">=</span> <span class="pl-c1">Directions</span>.<span class="pl-k">new</span>(client)
 
   <span class="pl-c"># Get directions via public transit in JSON format</span>
   <span class="pl-c"># To return the result in XML format, change the Client response_format parameter to :xml</span>
-  result <span class="pl-k">=</span> directions.query(<span class="pl-c1">origin:</span> <span class="pl-s"><span class="pl-pds">"</span>75 9th Ave, New York, NY<span class="pl-pds">"</span></span>, <span class="pl-c1">destination:</span> <span class="pl-s"><span class="pl-pds">"</span>MetLife Stadium Dr East Rutherford, NJ 07073<span class="pl-pds">"</span></span>,
-                            <span class="pl-c1">mode:</span> <span class="pl-s"><span class="pl-pds">"</span>transit<span class="pl-pds">"</span></span>, <span class="pl-c1">departure_time:</span> <span class="pl-c1">Time</span>.now)</pre></div>
+  result <span class="pl-k">=</span> directions.query(<span class="pl-c1">origin:</span> <span class="pl-s"><span class="pl-pds">'</span>75 9th Ave, New York, NY<span class="pl-pds">'</span></span>, <span class="pl-c1">destination:</span> <span class="pl-s"><span class="pl-pds">'</span>MetLife Stadium Dr East Rutherford, NJ 07073<span class="pl-pds">'</span></span>,
+                            <span class="pl-c1">mode:</span> <span class="pl-s"><span class="pl-pds">'</span>transit<span class="pl-pds">'</span></span>, <span class="pl-c1">departure_time:</span> <span class="pl-c1">Time</span>.now)
+  <span class="pl-c"># Print the result</span>
+  puts result</pre></div>
 
 <p>For more usage examples, check out the <a href="http://www.rubydoc.info/gems/googlemaps-services">reference documentation</a>.</p>
 
