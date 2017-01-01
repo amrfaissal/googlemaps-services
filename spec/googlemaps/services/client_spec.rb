@@ -47,17 +47,6 @@ describe GoogleClient do
   describe '#get_json_body' do
     let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
 
-    context 'given a response with status code 302' do
-      let (:resp) {
-        hash = {'location' => "https://rubygems.org", 'code' => '302'}
-        hash.extend(HashDot)
-        hash
-      }
-      it 'it returns a URL string' do
-        expect(client.send(:get_json_body, resp)).to eql('https://rubygems.org')
-      end
-    end
-
     context 'given a response with status code different than 200' do
       let (:resp) {
         hash = {'body' => '{}', 'code' => '400'}

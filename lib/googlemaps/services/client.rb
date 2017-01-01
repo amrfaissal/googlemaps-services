@@ -1,8 +1,10 @@
+# coding: utf-8
 require 'googlemaps/services/exceptions'
 require 'googlemaps/services/version'
 require 'googlemaps/services/util'
 require 'nokogiri'
 require 'net/http'
+require 'base64'
 require 'json'
 
 # Core functionality, common across all API requests.
@@ -173,11 +175,16 @@ module GoogleMaps
           if extract_body
             result = extract_body.call(resp)
           else
-            case self.response_format
-            when :xml # XML response
+            mime_type = Convert.get_mime_type(resp['Content-Type'])
+            case mime_type
+            when 'application/xml'
               result = get_xml_body(resp)
-            else # JSON response
+            when 'application/json'
               result = get_json_body(resp)
+            when 'text/html'
+              result = get_redirection_url(resp)
+            else
+              result = get_map_image(resp)
             end
           end
           self.sent_times.push(Util.current_time)
@@ -188,6 +195,17 @@ module GoogleMaps
         end
       end
 
+	  # Returns the redirection URL from the Response in case of 3XX status code.
+	  #
+	  # @private
+	  #
+	  # @param [Net::HTTPResponse] resp HTTP response object.
+	  #
+	  # @return [String] Redirection URL.
+	  def get_redirection_url(resp)
+		resp['location']
+	  end
+
       # Extracts the JSON body of the HTTP response.
       #
       # @private
@@ -197,12 +215,9 @@ module GoogleMaps
       # @return [Hash, Array] Valid JSON response.
       def get_json_body(resp)
         status_code = resp.code.to_i
-        if status_code >= 300 && status_code < 400
-          return resp['location']
-        end
 
         if status_code != 200
-          raise HTTPError.new(resp.code)
+          raise HTTPError.new(status_code)
         end
 
         # Parse the response body
@@ -237,12 +252,9 @@ module GoogleMaps
       # @return [Nokogiri::XML::Document] Valid XML document.
       def get_xml_body(resp)
         status_code = resp.code.to_i
-        if status_code >= 300 && status_code < 400
-          return resp['location']
-        end
 
         if status_code != 200
-          raise HTTPError.new(resp.code)
+          raise HTTPError.new(status_code)
         end
 
         begin
@@ -267,6 +279,23 @@ module GoogleMaps
           raise APIError.new(api_status)
         end
       end
+
+	  # Extracts the static map image from the HTTP response
+	  #
+	  # @private
+	  #
+	  # @param [Net::HTTPResponse] resp HTTP response object.
+	  #
+	  # @return [Hash] Hash with image MIME type and its base64-encoded value.
+	  def get_map_image(resp)
+		status_code = resp.code.to_i
+
+		if status_code != 200
+		  raise HTTPError.new(status_code)
+		end
+
+		{ :mime_type => resp['Content-Type'], :image_data => Base64.encode64(resp.body) }
+	  end
 
       # Returns the path and query string portion of the request URL, first adding any necessary parameters.
       #
@@ -297,7 +326,7 @@ module GoogleMaps
         raise StandardError, 'Must provide API key for this API. It does not accept enterprise credentials.'
       end
 
-      private :get_json_body, :get_xml_body, :generate_auth_url
+	  private :get_json_body, :get_xml_body, :get_map_image, :get_redirection_url, :generate_auth_url
     end
 
   end
