@@ -201,4 +201,12 @@ describe Convert do
     end
   end
 
+  describe '.get_mime_type' do
+    context 'given the Content-Type header value' do
+      it 'returns the MIME-Type value' do
+        content_type = "application/json; charset=UTF-8"
+        expect(Convert.get_mime_type(content_type)).to eql('application/json')
+      end
+    end
+  end
 end

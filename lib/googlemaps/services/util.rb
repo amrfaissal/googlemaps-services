@@ -295,6 +295,15 @@ module GoogleMaps
         unencoded = piped_location(locations)
         encoded.length < unencoded.length ? encoded : unencoded
       end
+
+	  # Returns the MIME type from the given header value.
+	  #
+	  # @param [String] content_type The Content-Type header value.
+	  #
+	  # @return [String] the MIME type value.
+	  def self.get_mime_type(content_type)
+		  content_type.split(';').first
+	  end
     end
 
   end
