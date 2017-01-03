@@ -3,6 +3,7 @@ require 'googlemaps/services/util'
 include GoogleMaps::Services
 
 describe Util do
+
   now = Time.parse('1969-07-20 20:17:40')
   before {
     allow(Time).to receive(:now) { now }
@@ -209,4 +210,5 @@ describe Convert do
       end
     end
   end
+
 end
