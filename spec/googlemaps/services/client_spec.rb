@@ -44,12 +44,40 @@ describe GoogleClient do
     end
   end
 
+  describe '#get_redirection_url' do
+    let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
+
+    context 'given a response with status code different than 3XX' do
+      let (:resp) {
+        hash = {'body' => '', 'code' => '200'}
+        hash.extend(HashDot)
+        hash
+      }
+
+      it 'returns a nil value' do
+        expect(client.send(:get_redirection_url, resp)).to eq(nil)
+      end
+    end
+
+    context 'given a response with a valid status code' do
+      let (:resp) {
+        hash = {'body' => '', 'code' => '304', 'location' => 'https://google.be/'}
+        hash.extend(HashDot)
+        hash
+      }
+
+      it 'returns a redirection URL' do
+        expect(client.send(:get_redirection_url, resp)).to eq('https://google.be/')
+      end
+    end
+  end
+
   describe '#get_json_body' do
     let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
 
     context 'given a response with status code different than 200' do
       let (:resp) {
-        hash = {'body' => '{}', 'code' => '400'}
+        hash = {'body' => '{}', 'code' => '403'}
         hash.extend(HashDot)
         hash
       }
@@ -66,6 +94,33 @@ describe GoogleClient do
       }
       it 'raises an APIError' do
         expect { client.send(:get_json_body, resp) }.to raise_error(APIError)
+      end
+    end
+  end
+
+  describe '#get_xml_body' do
+    let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
+
+    context 'given a response with status code different than 200' do
+      let (:resp) {
+        hash = {'body' => '<data></data>', 'code' => '403'}
+        hash.extend(HashDot)
+        hash
+      }
+
+      it 'raises an HTTPError' do
+        expect { client.send(:get_xml_body, resp) }.to raise_error(HTTPError)
+      end
+    end
+
+    context 'given a malformed XML response' do
+      let (:resp) {
+        hash = {'body' => 'random response', 'code' => '200'}
+        hash.extend(HashDot)
+        hash
+      }
+      it 'raises an APIError' do
+        expect { client.send(:get_xml_body, resp) }.to raise_error(APIError)
       end
     end
   end

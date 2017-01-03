@@ -95,7 +95,7 @@ module GoogleMaps
         end
       end
 
-      # Performs HTTP GET requests with credentials, returning the body as JSON or XML
+      # Performs HTTP GET requests with credentials, returning the body as JSON or XML.
       #
       # @param [String] url URL path for the request. Should begin with a slash.
       # @param [Hash] params HTTP GET parameters.
@@ -104,10 +104,10 @@ module GoogleMaps
       # @param [String] base_url The base URL for the request. Defaults to the Google Maps API server. Should not have a trailing slash.
       # @param [TrueClass, FalseClass] accepts_clientid Flag whether this call supports the client/signature params. Some APIs require API keys (e.g. Roads).
       # @param [Proc] extract_body A function that extracts the body from the request. If the request was not successful, the function should raise a
-      #               GoogleMaps::Services::Exceptions::HTTËrror or GoogleMaps::Services::Exceptions::APIError as appropriate.
+      #               GoogleMaps::Services::Exceptions::HTTPError or GoogleMaps::Services::Exceptions::APIError as appropriate.
       # @param [Hash] request_opts Additional options for the Net::HTTP client.
       #
-      # @return [Hash, Array] response body, either in JSON or XML.
+      # @return [Hash, Array, nil] response body (either in JSON or XML) or nil.
       def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: DEFAULT_BASE_URL,
               accepts_clientid: true, extract_body: nil, request_opts: nil)
         unless first_request_time
@@ -137,14 +137,14 @@ module GoogleMaps
         # Construct the Request URI
         uri = URI.parse(base_url + authed_url)
 
-        # Add request headers
+        # Create the request and add the headers
         req = Net::HTTP::Get.new(uri.to_s)
-
         request_opts[:headers].each { |header,value| req.add_field(header, value) }
 
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = (uri.scheme == 'https')
-        # Get HTTP response
+
+        # Get the HTTP response
         resp = http.request(req)
 
         # Handle response errors
@@ -195,16 +195,17 @@ module GoogleMaps
         end
       end
 
-	  # Returns the redirection URL from the Response in case of 3XX status code.
-	  #
-	  # @private
-	  #
-	  # @param [Net::HTTPResponse] resp HTTP response object.
-	  #
-	  # @return [String] Redirection URL.
-	  def get_redirection_url(resp)
-		resp['location']
-	  end
+      # Returns the redirection URL from the Response in case of 3XX status code.
+      #
+      # @private
+      #
+      # @param [Net::HTTPResponse] resp HTTP response object.
+      #
+      # @return [String] Redirection URL.
+      def get_redirection_url(resp)
+        status_code = resp.code.to_i
+        (status_code >= 300 && status_code < 400) ? resp['location'] : nil
+      end
 
       # Extracts the JSON body of the HTTP response.
       #
@@ -220,7 +221,7 @@ module GoogleMaps
           raise HTTPError.new(status_code)
         end
 
-        # Parse the response body
+        # Parse the JSON response body
         begin
           body = JSON.parse(resp.body)
         rescue JSON::ParserError
@@ -257,8 +258,9 @@ module GoogleMaps
           raise HTTPError.new(status_code)
         end
 
+        # Parse the XML response body
         begin
-          doc = Nokogiri::XML.parse(resp.body)
+          doc = Nokogiri::XML(resp.body) { |config| config.strict }
         rescue
           raise APIError.new(status_code), 'Received a malformed XML response.'
         end
@@ -280,22 +282,22 @@ module GoogleMaps
         end
       end
 
-	  # Extracts the static map image from the HTTP response
-	  #
-	  # @private
-	  #
-	  # @param [Net::HTTPResponse] resp HTTP response object.
-	  #
-	  # @return [Hash] Hash with image MIME type and its base64-encoded value.
-	  def get_map_image(resp)
-		status_code = resp.code.to_i
+      # Extracts the static map image from the HTTP response.
+      #
+      # @private
+      #
+      # @param [Net::HTTPResponse] resp HTTP response object.
+      #
+      # @return [Hash] Hash with image MIME type and its base64-encoded value.
+      def get_map_image(resp)
+        status_code = resp.code.to_i
 
-		if status_code != 200
-		  raise HTTPError.new(status_code)
-		end
+        if status_code != 200
+          raise HTTPError.new(status_code)
+        end
 
-		{ :mime_type => resp['Content-Type'], :image_data => Base64.encode64(resp.body) }
-	  end
+        { :mime_type => resp['Content-Type'], :image_data => Base64.encode64(resp.body) }
+      end
 
       # Returns the path and query string portion of the request URL, first adding any necessary parameters.
       #
@@ -326,7 +328,7 @@ module GoogleMaps
         raise StandardError, 'Must provide API key for this API. It does not accept enterprise credentials.'
       end
 
-	  private :get_json_body, :get_xml_body, :get_map_image, :get_redirection_url, :generate_auth_url
+      private :get_json_body, :get_xml_body, :get_map_image, :get_redirection_url, :generate_auth_url
     end
 
   end
