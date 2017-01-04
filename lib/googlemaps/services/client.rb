@@ -184,7 +184,7 @@ module GoogleMaps
             when 'text/html'
               result = get_redirection_url(resp)
             else
-              result = get_map_image(resp)
+              result = get_map_image(req, resp)
             end
           end
           self.sent_times.push(Util.current_time)
@@ -288,15 +288,19 @@ module GoogleMaps
       #
       # @param [Net::HTTPResponse] resp HTTP response object.
       #
-      # @return [Hash] Hash with image MIME type and its base64-encoded value.
-      def get_map_image(resp)
+      # @return [Hash] Hash with image URL, MIME type and its base64-encoded value.
+      def get_map_image(req, resp)
         status_code = resp.code.to_i
 
         if status_code != 200
           raise HTTPError.new(status_code)
         end
 
-        { :mime_type => resp['Content-Type'], :image_data => Base64.encode64(resp.body) }
+        {
+          :url => req.path,
+          :mime_type => Convert.get_mime_type(resp['Content-Type']),
+          :image_data => Base64.encode64(resp.body).gsub(/\n/, '')
+        }
       end
 
       # Returns the path and query string portion of the request URL, first adding any necessary parameters.
