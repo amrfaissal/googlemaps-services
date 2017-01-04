@@ -72,6 +72,47 @@ describe GoogleClient do
     end
   end
 
+  describe '#get_map_image' do
+    let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
+    let (:req) {
+      hash = {'method' => 'GET', 'path' => 'https://google.be/'}
+      hash.extend(HashDot)
+      hash
+    }
+
+    context 'given a response with status code different than 200' do
+      let (:resp) {
+        hash = {'body' => '', 'code' => '400'}
+        hash.extend(HashDot)
+        hash
+      }
+
+      it 'raises an HTTPError' do
+        expect { client.send(:get_map_image, req, resp) }.to raise_error(HTTPError)
+      end
+    end
+
+    context 'given a valid response status code' do
+      let (:resp) {
+        hash = {
+          'code' => '200',
+          'Content-Type' => 'text/html; charset=UTF-8',
+          'body' => "<html><body><div>Hello World!</div></body></html>"
+        }
+        hash.extend(HashDot)
+        hash
+      }
+
+      it 'returns a hash with media information (URL, MIME type and Base64-encoded value)' do
+        expect(client.send(:get_map_image, req, resp)).to eql({
+          :url => 'https://google.be/',
+          :mime_type => 'text/html',
+          :image_data => 'PGh0bWw+PGJvZHk+PGRpdj5IZWxsbyBXb3JsZCE8L2Rpdj48L2JvZHk+PC9odG1sPg=='
+        })
+      end
+    end
+  end
+
   describe '#get_json_body' do
     let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
 
