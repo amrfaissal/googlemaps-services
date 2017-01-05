@@ -211,4 +211,18 @@ describe Convert do
     end
   end
 
+  describe '.rectangular_dimensions' do
+    context 'given an argument of wrong type' do
+      it 'raises a TypeError exception' do
+        expect { Convert.rectangular_dimensions([]) }.to raise_error(TypeError)
+      end
+    end
+
+    context 'given a hash with horizontal and vertical values' do
+      it 'returns a string value in the form lengthxwidth' do
+        expect(Convert.rectangular_dimensions({:length => 640, :width => 300})).to eql('640x300')
+      end
+    end
+  end
+
 end

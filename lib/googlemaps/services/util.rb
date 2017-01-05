@@ -304,6 +304,20 @@ module GoogleMaps
       def self.get_mime_type(content_type)
         content_type.split(';').first
       end
+
+      # Returns the rectangular dimensions in the form {horizontal_value}x{vertical_value}.
+      #
+      # @example
+      #   size = Convert.rectangular_dimensions({:length => 500, :width => 400})
+      #   => "500x400"
+      #
+      # @param [Hash] size The size hash.
+      #
+      # @return [String] a string value in the form "lengthxwidth".
+      def self.rectangular_dimensions(size)
+        raise TypeError, "#{__method__.to_s} expected a Hash." unless size.is_a? Hash
+        "#{size[:length]}x#{size[:width]}"
+      end
     end
 
   end
