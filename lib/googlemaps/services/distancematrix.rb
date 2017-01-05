@@ -7,7 +7,7 @@ module GoogleMaps
     # Performs requests to the Google Maps Distance Matrix API.
     #
     # @example
-    #   distancematrix = GoogleMaps::Services::DistanceMatrix(client)
+    #   distancematrix = GoogleMaps::Services::DistanceMatrix.new(client)
     #   result = distancematrix.query(origins: ["Brussels", "Ghent"], destinations: ["Bruges"])
     class DistanceMatrix
       # @return [Symbol] the HTTP client.

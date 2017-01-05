@@ -7,7 +7,7 @@ module GoogleMaps
     # Performs requests to the Google Maps Elevation API.
     #
     # @example
-    #   elevation = GoogleMaps::Services::Elevation(client)
+    #   elevation = GoogleMaps::Services::Elevation.new(client)
     #   result = elevation.query(locations: [{:lat => 52.520645, :lng => 13.409779}, "Brussels"])
     class Elevation
       attr_accessor :client

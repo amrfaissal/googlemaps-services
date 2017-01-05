@@ -62,7 +62,7 @@ module GoogleMaps
                 type: type, page_token: page_token)
       end
 
-      # Performs radar search for places
+      # Performs radar search for places.
       #
       # @param [String, Hash] location The latitude/longitude value for which you wish to obtain the closest, human-readable address.
       # @param [Integer] radius Distance in meters within which to bias results.
@@ -71,7 +71,7 @@ module GoogleMaps
       # @param [Integer] max_price Restricts results to only those places with no greater than this price level. Valid values are in the range from 0 (most affordable) to 4 (most expensive).
       # @param [Array] name One or more terms to be matched against the names of places.
       # @param [TrueClass, FalseClass] open_now Return only those places that are open for business at the time the query is sent.
-      # @param [String] type: Restricts the results to places matching the specified type. The full list of supported types is available here: https://developers.google.com/places/supported_types
+      # @param [String] type Restricts the results to places matching the specified type. The full list of supported types is available here: https://developers.google.com/places/supported_types
       #
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def radar(location:, radius:, keyword: nil, min_price: nil,
@@ -152,9 +152,9 @@ module GoogleMaps
 
       # Downloads a photo from the Places API.
       #
-      # @param [String] photo_reference: A string identifier that uniquely identifies a photo, as provided by either a Places search or Places detail request.
-      # @param [Integer] max_width: Specifies the maximum desired width, in pixels.
-      # @param [Integer] max_height: Specifies the maximum desired height, in pixels.
+      # @param [String] photo_reference A string identifier that uniquely identifies a photo, as provided by either a Places search or Places detail request.
+      # @param [Integer] max_width Specifies the maximum desired width, in pixels.
+      # @param [Integer] max_height Specifies the maximum desired height, in pixels.
       #
       # @return [String] URL of the photo.
       def place_photo(photo_reference:, max_width: nil, max_height: nil)

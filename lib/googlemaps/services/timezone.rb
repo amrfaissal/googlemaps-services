@@ -6,7 +6,7 @@ module GoogleMaps
     # Performs requests to the Google Maps Timezone API.
     #
     # @example
-    #   timezone = GoogleMaps::Services::Timezone(client)
+    #   timezone = GoogleMaps::Services::Timezone.new(client)
     #   result = timezone.query(location: "38.908133,-77.047119")
     class Timezone
       # @return [Symbol] The HTTP client.
