@@ -308,8 +308,7 @@ module GoogleMaps
       # Returns the rectangular dimensions in the form {horizontal_value}x{vertical_value}.
       #
       # @example
-      #   size = Convert.rectangular_dimensions({:length => 500, :width => 400})
-      #   => "500x400"
+      #   Convert.rectangular_dimensions({:length => 500, :width => 400}) # "500x400"
       #
       # @param [Hash] size The size hash.
       #
