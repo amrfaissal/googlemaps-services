@@ -2,6 +2,25 @@ require 'googlemaps/services/util'
 
 include GoogleMaps::Services
 
+describe HashDot do
+  context 'given a hash with keys and values' do
+    it 'accesses a key by method' do
+      hash = { :key1 => 'value1', :key2 => 'value2', :key3 => 'value3'}
+      hash.extend(HashDot)
+      expect(hash.key1).to eq('value1')
+      expect(hash.key2).to eq('value2')
+      expect(hash.key3).to eq('value3')
+    end
+  end
+
+  context 'given an empty hash and trying to access a key by method' do
+    it 'raises a NoMethodError exception' do
+      hash = {}
+      expect { hash.key1 }.to raise_error(NoMethodError)
+    end
+  end
+end
+
 describe Util do
 
   now = Time.parse('1969-07-20 20:17:40')
