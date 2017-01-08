@@ -8,12 +8,14 @@ module GoogleMaps
   module Services
 
     module HashDot
-      def method_missing(meth, *args, &block)
-        if has_key?(meth.to_s)
-          self[meth.to_s]
-        else
-          raise NoMethodError, "undefined method #{meth} for #{self}"
+      def method_missing(method, *opts)
+        m = method.to_s
+        if self.has_key?(m)
+          return self[m]
+        elsif self.has_key?(m.to_sym)
+          return self[m.to_sym]
         end
+        super
       end
     end
 
