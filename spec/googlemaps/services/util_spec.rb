@@ -5,7 +5,7 @@ include GoogleMaps::Services
 describe HashDot do
   context 'given a hash with keys and values' do
     it 'accesses a key by method' do
-      hash = { :key1 => 'value1', :key2 => 'value2', :key3 => 'value3'}
+      hash = { :key1 => 'value1', 'key2' => 'value2', :key3 => 'value3'}
       hash.extend(HashDot)
       expect(hash.key1).to eq('value1')
       expect(hash.key2).to eq('value2')
@@ -16,7 +16,31 @@ describe HashDot do
   context 'given an empty hash and trying to access a key by method' do
     it 'raises a NoMethodError exception' do
       hash = {}
+      hash.extend(HashDot)
       expect { hash.key1 }.to raise_error(NoMethodError)
+    end
+  end
+end
+
+describe ArrayBox do
+  describe '.wrap' do
+    context 'given a nil object' do
+      it 'returns an empty array' do
+        expect(ArrayBox.wrap(nil)).to eql([])
+      end
+    end
+
+    context 'given a plain old object' do
+      it 'returns an array containing that object' do
+        expect(ArrayBox.wrap(1)).to eql([1])
+      end
+    end
+  end
+
+  describe '.contains_all?' do
+    it 'checks if one array contains all elements of another array' do
+      target_arr = ["element1", "element2", "element3"]
+      expect(ArrayBox.contains_all?(target_arr, ["element1"])).to eql(true)
     end
   end
 end
