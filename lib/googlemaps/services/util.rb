@@ -39,6 +39,25 @@ module GoogleMaps
           [object]
         end
       end
+
+      # Determines if one array contains all elements of another array.
+      #
+      # @param [Array] arr target array.
+      # @param [Array] other array to look for in the target array.
+      # @example
+      #   myarr = ["hello", "world"]
+      #   ArrayBox.contains_all? myarr, ["hello"] # true
+      #
+      # @return [TrueClass, FalseClass] a boolean.
+      def self.contains_all?(arr, other)
+        h = arr.inject(Hash.new(0)) {|h, i| h[i] += 1; h}
+        other.each do |i|
+          return false unless h.has_key?(i)
+          return false if h[i].zero?
+          h[i] -= 1
+        end
+        return true
+      end
     end
 
     # Set of utility methods.
