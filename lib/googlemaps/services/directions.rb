@@ -3,6 +3,7 @@ require 'googlemaps/services/util'
 module GoogleMaps
   module Services
     TRAVEL_MODES = %w(driving walking bicycling transit)
+    AVOID_FEATURES = %w(tolls highways ferries indoor)
 
     # Performs requests to the Google Maps Directions API.
     #
@@ -72,6 +73,9 @@ module GoogleMaps
         end
 
         if avoid
+          unless ArrayBox.contains_all?(AVOID_FEATURES, avoid)
+            raise StandardError, 'invalid avoid feature.'
+          end
           params['avoid'] = Convert.join_array('|', avoid)
         end
 
