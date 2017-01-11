@@ -12,7 +12,7 @@ describe Timezone do
 
   describe '#query' do
     it 'returns the time zone for a location on earth' do
-      expect(timezone.query(location: '50.8503,4.3517')).to eq({})
+      expect(timezone.query(location: '50.8503,4.3517', language: "fr")).to eq({})
     end
   end
 end
