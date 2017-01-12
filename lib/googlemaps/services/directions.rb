@@ -45,7 +45,7 @@ module GoogleMaps
       #
       # @return [Array, Nokogiri::XML::NodeSet] Valid JSON or XML response.
       def query(origin:, destination:, mode: nil, waypoints: nil, alternatives: false,
-                avoid: nil, language: nil, units: nil, region: nil, departure_time: nil,
+                avoid: [], language: nil, units: nil, region: nil, departure_time: nil,
                 arrival_time: nil, optimize_waypoints: false, transit_mode: nil,
                 transit_routing_preference: nil, traffic_model: nil)
         params = {
@@ -118,8 +118,10 @@ module GoogleMaps
         case self.client.response_format
         when :xml
           self.client.get(url: '/maps/api/directions/xml', params: params).xpath('//route')
-        else
+        when :json
           self.client.get(url: '/maps/api/directions/json', params: params)['routes']
+        else
+          raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end
       end
     end
