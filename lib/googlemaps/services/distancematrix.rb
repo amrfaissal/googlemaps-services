@@ -3,6 +3,7 @@ require 'googlemaps/services/util'
 module GoogleMaps
   module Services
     AVOIDS = %w(tolls highways ferries)
+    TRAVEL_MODES = %w(driving walking bicycling transit)
 
     # Performs requests to the Google Maps Distance Matrix API.
     #
