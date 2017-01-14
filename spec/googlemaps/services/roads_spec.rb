@@ -84,7 +84,7 @@ describe Roads do
 
     context 'given a valid JSON response' do
       let (:resp) {
-        hash = { 'body' => '{"results":[], "status":"OK"}', 'code': '200' }
+        hash = { 'body' => '{"results":[], "status":"OK"}', 'code' => '200' }
         hash.extend(HashDot)
         hash
       }
