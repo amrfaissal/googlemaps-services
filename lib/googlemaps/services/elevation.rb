@@ -25,22 +25,17 @@ module GoogleMaps
       # @param [Integer] samples The number of sample points along a path for which to return elevation data.
       #
       # @return [Array, Nokogiri::XML::NodeSet] Valid JSON or XML response.
-      def query(locations: [], path: nil, samples: 0)
+      def query(locations: nil, path: nil, samples: 0)
         params = {}
-
-        if path && locations
-          raise StandardError, 'Should not specify both path and locations.'
-        end
 
         if locations
           params['locations'] = Convert.shortest_path(locations)
         end
 
         if path
-          case path.class
-          when String
+          if path.instance_of? String
             path = "enc:#{path}"
-          when Array
+          elsif path.instance_of? Array
             path = Convert.shortest_path(path)
           else
             raise TypeError, 'Path should be either a String or an Array.'
@@ -49,11 +44,17 @@ module GoogleMaps
           params = {'path' => path, 'samples' => samples }
         end
 
+        if path && locations
+          raise StandardError, 'Should not specify both path and locations.'
+        end
+
         case self.client.response_format
         when :xml
           self.client.get(url: '/maps/api/elevation/xml', params: params).xpath('//result')
-        else
+        when :json
           self.client.get(url: '/maps/api/elevation/json', params: params)['results']
+        else
+          raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end
       end
     end

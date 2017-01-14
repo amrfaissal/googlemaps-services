@@ -56,8 +56,10 @@ module GoogleMaps
         case self.client.response_format
         when :xml
           self.client.get(url: '/maps/api/geocode/xml', params: params).xpath('//result')
-        else
+        when :json
           self.client.get(url: '/maps/api/geocode/json', params: params)['results']
+        else
+          raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end
       end
     end
@@ -85,7 +87,7 @@ module GoogleMaps
       def query(latlng:, result_type: nil, location_type: nil, language: nil)
         # Check if latlng param is a place_id string.
         # 'place_id' strings do not contain commas; latlng strings do.
-        if latlng.is_a?(String) && !latlng.include?("'")
+        if latlng.is_a?(String) && !latlng.include?(",")
           params = {'place_id' => latlng}
         else
           params = {'latlng' => Convert.to_latlng(latlng)}
@@ -106,8 +108,10 @@ module GoogleMaps
         case self.client.response_format
         when :xml
           self.client.get(url: '/maps/api/geocode/xml', params: params).xpath('//result')
-        else
+        when :json
           self.client.get(url: '/maps/api/geocode/json', params: params)['results']
+        else
+          raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end
       end
     end
