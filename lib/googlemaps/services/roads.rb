@@ -10,36 +10,6 @@ module GoogleMaps
     class Roads
       include GoogleMaps::Services::Exceptions
 
-      # Extracts a result from a Roads API HTTP response.
-      @@_roads_extract = Proc.new { |resp|
-        status_code = resp.code.to_i
-        begin
-          body = JSON.parse(resp.body)
-        rescue JSON::ParserError
-          raise APIError.new(status_code), 'Received malformed response.'
-        end
-
-        if body.key?('error')
-          error = body['error']
-          status = error['status']
-
-          if status == 'RESOURCE_EXHAUSTED'
-            raise RetriableRequest
-          end
-
-          if error.key?('message')
-            raise APIError.new(status), error['message']
-          else
-            raise APIError.new(status)
-          end
-        end
-
-        if status_code != 200
-          raise HTTPError.new(status_code)
-        end
-        body
-      }
-
       # @return [Symbol] the HTTP client.
       attr_accessor :client
 
@@ -65,7 +35,7 @@ module GoogleMaps
         end
 
         self.client.get(url: '/v1/snapToRoads', params: params, base_url: ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: @@_roads_extract)['snappedPoints']
+                        accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
       end
 
       # Returns the posted speed limit (in km/h) for given road segments.
@@ -80,7 +50,7 @@ module GoogleMaps
         params = {'placeId' => place_ids}
 
         self.client.get(url: '/v1/speedLimits', params: params, base_url: ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: @@_roads_extract)['speedLimits']
+                        accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['speedLimits']
       end
 
       # Returns the posted speed limit (in km/h) for given road segments.
@@ -93,7 +63,7 @@ module GoogleMaps
         params = {'path' => Convert.piped_location(path)}
 
         self.client.get(url: '/v1/speedLimits', params: params, base_url: ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: @@_roads_extract)
+                        accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))
       end
 
       # Find the closest road segments for each point.
@@ -107,9 +77,46 @@ module GoogleMaps
         params = {'points' => Convert.piped_location(points)}
 
         self.client.get(url: '/v1/nearestRoads', params: params, base_url: ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: @@_roads_extract)['snappedPoints']
+                        accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
       end
-    end
 
+      # Extracts a result from a Roads API HTTP response.
+      #
+      # @private
+      #
+      # @param [Net::HTTPResponse] resp HTTP response object.
+      #
+      # @return [Hash, Array] Valid JSON response.
+      def _roads_extract(resp)
+        status_code = resp.code.to_i
+        begin
+          body = JSON.parse(resp.body)
+        rescue JSON::ParserError
+          raise APIError.new(status_code), 'Received malformed response.'
+        end
+
+        if body.key?('error')
+          error = body['error']
+          status = error['status']
+
+          if status == 'RESOURCE_EXHAUSTED'
+            raise RetriableRequest
+          end
+
+          if error.respond_to?(:key?) && error.key?('message')
+            raise APIError.new(status), error['message']
+          else
+            raise APIError.new(status)
+          end
+        end
+
+        if status_code != 200
+          raise HTTPError.new(status_code)
+        end
+        body
+      end
+
+      private :_roads_extract
+    end
   end
 end
