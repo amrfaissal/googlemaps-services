@@ -38,41 +38,35 @@ module GoogleMaps
       # @param [String] maptype The type of map to construct. Defaults to "roadmap".
       # @param [String] language The language to use for display of labels on map tiles.
       # @param [String] region The region code specified as a two-character ccTLD ('top-level domain') value.
-      # @param [String, List] markers One or more markers to attach to the image at specified locations.
+      # @param [String, Array] markers One or more markers to attach to the image at specified locations.
+      # @param [String, Array] path The single path of two or more connected points to overlay in the image at the specified locations.
+      # @param [String, Array] visible One or more locations that should remain visible on the map.
+      # @param [String] style A custom style to alter the presentation of a specific feature (roads, parks, and other features) of the map.
       def query(size:, center: nil, zoom: nil, scale: 1, format: "png", maptype: "roadmap",
-                language: nil, region: nil, markers: nil,path: nil, visible: nil, style: nil)
+                language: nil, region: nil, markers: nil, path: nil, visible: nil, style: nil)
         params = { 'size' => Convert.rectangular_dimensions(size) }
 
-        unless (center && zoom) || markers
-          raise StandardError, "both center and zoom are required if markers not present"
-        end
+        if markers
+          params['markers'] = markers
+        else
+          raise StandardError, "both center and zoom are required if markers not present." unless (center && zoom)
 
-        if center
           params['center'] = Convert.to_latlng(center)
-        end
-
-        if zoom
           params['zoom'] = zoom
         end
 
         if scale != 1
-          unless ALLOWED_SCALES.include? scale
-            raise StandardError, "invalid scale value."
-          end
+          raise StandardError, "invalid scale value." unless ALLOWED_SCALES.include? scale
           params['scale'] = scale
         end
 
         if format != "png"
-          unless SUPPORTED_IMG_FORMATS.include? format
-            raise StandardError, "invalid image format."
-          end
+          raise StandardError, "invalid image format." unless SUPPORTED_IMG_FORMATS.include? format
           params['format'] = format
         end
 
         if maptype != "roadmap"
-          unless SUPPORTED_MAP_TYPES.include? maptype
-            raise StandardError, "invalid maptype value."
-          end
+          raise StandardError, "invalid maptype value." unless SUPPORTED_MAP_TYPES.include? maptype
           params['maptype'] = maptype
         end
 
@@ -82,10 +76,6 @@ module GoogleMaps
 
         if region
           params['region'] = region
-        end
-
-        if markers
-          params['markers'] = markers
         end
 
         if path

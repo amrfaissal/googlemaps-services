@@ -2,15 +2,15 @@ require 'googlemaps/services/util'
 
 module GoogleMaps
   module Services
-    AVOIDS = %w(tolls highways ferries)
-    TRAVEL_MODES = %w(driving walking bicycling transit)
-
     # Performs requests to the Google Maps Distance Matrix API.
     #
     # @example
     #   distancematrix = GoogleMaps::Services::DistanceMatrix.new(client)
     #   result = distancematrix.query(origins: ["Brussels", "Ghent"], destinations: ["Bruges"])
     class DistanceMatrix
+      AVOIDS = %w(tolls highways ferries)
+      TRAVEL_MODES = %w(driving walking bicycling transit)
+
       # @return [Symbol] the HTTP client.
       attr_accessor :client
 

@@ -2,15 +2,15 @@ require 'googlemaps/services/util'
 
 module GoogleMaps
   module Services
-    TRAVEL_MODES = %w(driving walking bicycling transit)
-    AVOID_FEATURES = %w(tolls highways ferries indoor)
-
     # Performs requests to the Google Maps Directions API.
     #
     # @example
     #   directions = GoogleMaps::Services::Directions.new(client)
     #   result = directions.query(origin: "Brussels", destination: {:lat => 52.520645, :lng => 13.409779})
     class Directions
+      TRAVEL_MODES = %w(driving walking bicycling transit)
+      AVOID_FEATURES = %w(tolls highways ferries indoor)
+
       # @return [Symbol] The HTTP client.
       attr_accessor :client
 

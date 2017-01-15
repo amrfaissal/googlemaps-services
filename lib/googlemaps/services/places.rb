@@ -76,9 +76,7 @@ module GoogleMaps
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def radar(location:, radius:, keyword: nil, min_price: nil,
                      max_price: nil, name: nil, open_now: false, type: nil)
-        unless keyword || name || type
-          raise StandardError, 'either a keyword, name, or type arg is required.'
-        end
+        raise StandardError, 'either a keyword, name, or type arg is required.' unless (keyword || name || type)
 
         _places(url_part: 'radar', location: location, radius: radius,
                 keyword: keyword, min_price: min_price, max_price: max_price,
@@ -158,9 +156,7 @@ module GoogleMaps
       #
       # @return [String] URL of the photo.
       def place_photo(photo_reference:, max_width: nil, max_height: nil)
-        unless max_width || max_height
-          raise StandardError, 'a max_width or max_height arg is required'
-        end
+        raise StandardError, 'a max_width or max_height arg is required' unless (max_width || max_height)
 
         params = {'photoreference' => photo_reference}
 
@@ -238,8 +234,10 @@ module GoogleMaps
         case self.client.response_format
         when :xml
           self.client.get(url: "/maps/api/place/#{url_part}autocomplete/xml", params: params).xpath('//prediction')
-        else
+        when :json
           self.client.get(url: "/maps/api/place/#{url_part}autocomplete/json", params: params)['predictions']
+        else
+          raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end
       end
 

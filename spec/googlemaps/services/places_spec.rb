@@ -6,21 +6,59 @@ include GoogleMaps::Services
 describe Places do
   let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
   let (:places) { Places.new(client) }
-  before (:each) {
-    allow(places).to receive(:_places).and_return({})
+  before {
     allow(client).to receive(:get).and_return({})
-    allow(places).to receive(:_autocomplete).and_return([])
   }
 
   describe '#search' do
     it 'returns search results' do
-      expect(places.search(query: 'Some place')).to eq({})
+      expect(
+        places.search(query: 'Some place',
+                     location: "50.8449925,4.362961",
+                     radius: 12.3,
+                     language: "en",
+                     min_price: 12,
+                     max_price: 40,
+                     open_now: true,
+                     type: "cafe",
+                     page_token: "20")
+      ).to eq({})
     end
   end
 
   describe '#nearby' do
-    it 'returns nearby search results' do
-      expect(places.nearby(location: {:lat => 50.8503, :lng => 4.3517})).to eq({})
+    context 'given rank by distance' do
+      it 'raises a StandardError if keyword, name and type are nil' do
+        expect {
+          places.nearby(location: {:lat => 50.8503, :lng => 4.3517}, rank_by: "distance")
+        }.to raise_error(StandardError)
+      end
+
+      it 'raises s StandardError if radius is not nil' do
+        expect {
+          places.nearby(location: {:lat => 50.8503, :lng => 4.3517},
+            rank_by: "distance",
+            type: "cafe",
+            radius: 500)
+        }.to raise_error(StandardError)
+      end
+    end
+
+    context 'given a certain location' do
+      it 'returns nearby search results' do
+        expect(
+          places.nearby(location: {:lat => 50.8503, :lng => 4.3517},
+            radius: 500,
+            keyword: "cafe_late",
+            type: "cafe",
+            page_token: "20",
+            open_now: true,
+            language: "en",
+            rank_by: "type",
+            min_price: 2,
+            max_price: 6.5)
+        ).to eq({})
+      end
     end
   end
 
@@ -33,7 +71,7 @@ describe Places do
       end
     end
 
-    context 'given a keyword, type or name' do
+    context 'given a certain location' do
       it 'returns radar search results' do
         expect(places.radar(location: {:lat => 50.8503, :lng => 4.3517}, radius: 10, name: 'Brussels')).to eq({})
       end
@@ -42,7 +80,7 @@ describe Places do
 
   describe '#place_details' do
     it 'returns details for an individual place' do
-      expect(places.place_details(place_id: 'ChIJZ2jHc-2kw0cRpwJzeGY6i8E')).to eq({})
+      expect(places.place_details(place_id: 'ChIJZ2jHc-2kw0cRpwJzeGY6i8E', language: "en")).to eq({})
     end
   end
 
@@ -52,7 +90,7 @@ describe Places do
         expect {
           photo_ref = 'CnRvAAAAwMpdHeWlXl-lH0vp7lez4znKPIWSWvgvZFISdKx45AwJVP1Qp37YOrH7sqHMJ8C-vBDC546decipPHchJhHZL94RcTUfPa1jWzo-rSHaTlbNtjh-N68RkcToUCuY9v2HNpo5mziqkir37WU8FJEqVBIQ4k938TI3e7bf8xq-uwDZcxoUbO_ZJzPxremiQurAYzCTwRhE_V0'
           places.search(photo_reference: photo_ref)
-       }.to raise_error(StandardError)
+        }.to raise_error(StandardError)
       end
     end
 
@@ -61,20 +99,98 @@ describe Places do
         expected = 'https://lh4.googleusercontent.com/-1wzlVdxiW14/USSFZnhNqxI/AAAAAAAABGw/YpdANqaoGh4/s1600-w400/Google%2BSydney'
         allow(client).to receive(:get).and_return(expected)
         photo_ref = 'CnRvAAAAwMpdHeWlXl-lH0vp7lez4znKPIWSWvgvZFISdKx45AwJVP1Qp37YOrH7sqHMJ8C-vBDC546decipPHchJhHZL94RcTUfPa1jWzo-rSHaTlbNtjh-N68RkcToUCuY9v2HNpo5mziqkir37WU    8FJEqVBIQ4k938TI3e7bf8xq-uwDZcxoUbO_ZJzPxremiQurAYzCTwRhE_V0'
-        expect(places.place_photo(photo_reference: photo_ref, max_width: 400)).to eq(expected)
+        expect(places.place_photo(photo_reference: photo_ref, max_width: 400, max_height: 600)).to eq(expected)
       end
     end
   end
 
   describe '#autocomplete' do
-    it 'returns an array of place predictions given a search string' do
-      expect(places.autocomplete(input_text: 'Brussels')).to eq([])
+    context 'given unsupported response format' do
+      it 'raises a StandardError exception' do
+        client.response_format = :weird
+        expect {
+          places.autocomplete(input_text: 'Brussels',
+            offset: 6,
+            location: "50.9472095,4.0028986",
+            radius: 50)
+        }.to raise_error(StandardError)
+      end
+    end
+
+    context 'given a response format of value :json' do
+      before {
+        allow(client).to receive(:get).and_return({'predictions' => []})
+      }
+      it 'returns an array of predictions' do
+        client.response_format = :json
+        expect(
+          places.autocomplete(input_text: 'Brussels',
+            offset: 6,
+            location: "50.9472095,4.0028986",
+            radius: 50,
+            language: "en",
+            type: "locality",
+            components: {'country' => 'BE', 'postal_code' => 1000})
+        ).to eq([])
+      end
+    end
+
+    context 'given a response format of value :xml' do
+      before {
+        xml = <<-XML
+                <AutocompletionResponse>
+                  <status>OK</status>
+                  <prediction>
+                    <description>Paris, France</description>
+                    <type>locality</type>
+                    <type>political</type>
+                    <type>geocode</type>
+                    <place_id>ChIJD7fiBh9u5kcRYJSMaMOCCwQ</place_id>
+                    <reference>CiQRAAAAJm0CiCHIC8C4GOjREdm3QtHYhMyFaUXKWAbGSaZImQ8SECnHAhpcuZaoSr0_TKfeHvwaFHMIq_BmUccTC4mt6EWVNMa67Xuq</reference>
+                    <id>691b237b0322f28988f3ce03e321ff72a12167fd</id>
+                    <term>
+                      <value>Paris</value>
+                      <offset>0</offset>
+                    </term>
+                    <term>
+                      <value>France</value>
+                      <offset>7</offset>
+                    </term>
+                    <matched_substring>
+                    <offset>0</offset>
+                    <length>5</length>
+                    </matched_substring>
+                  </prediction>
+                </AutocompletionResponse>
+        XML
+        allow(client).to receive(:get).and_return(Nokogiri::XML(xml))
+      }
+
+      it 'returns an XML NodeSet of predictions' do
+        client.response_format = :xml
+        expected_val = places.autocomplete(input_text: 'Brussels',
+          offset: 6,
+          location: "50.9472095,4.0028986",
+          radius: 50,
+          language: "en",
+          type: "locality",
+          components: {'country' => 'BE', 'postal_code' => 1000})
+
+        expect(expected_val.is_a? Nokogiri::XML::NodeSet).to eq(true)
+        expect(expected_val.empty?).to eq(false)
+        expect(expected_val.size).to eq(1)
+      end
     end
   end
 
   describe '#autocomplete_query' do
     it 'returns an array of place predictions given a search query' do
-      expect(places.autocomplete_query(input_text: 'pizza near Brussels')).to eq([])
+      allow(client).to receive(:get).and_return({'predictions' => []})
+      expect(places.autocomplete_query(input_text: 'pizza near Brussels',
+          offset: 6,
+          location: "50.9472095,4.0028986",
+          radius: 50,
+          language: "en")).to eq([])
     end
   end
 end
