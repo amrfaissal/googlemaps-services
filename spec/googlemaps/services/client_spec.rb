@@ -1,3 +1,4 @@
+require 'http'
 require 'googlemaps/services/client'
 require 'googlemaps/services/exceptions'
 
@@ -35,13 +36,6 @@ describe GoogleClient do
         expect { client.get(url: '/path/to/services', params: {}) }.to raise_error(StandardError)
       end
     end
-
-    context 'given a timeout with either connect_timeout or read_timeout' do
-      let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', timeout: 60, connect_timeout: 30) }
-      it 'raises an error' do
-        expect { client.get(url: '/path/to/services', params: {}) }.to raise_error(StandardError)
-      end
-    end
   end
 
   describe '#get_redirection_url' do
@@ -74,11 +68,6 @@ describe GoogleClient do
 
   describe '#get_map_image' do
     let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
-    let (:req) {
-      hash = {'method' => 'GET', 'path' => 'https://google.be/'}
-      hash.extend(HashDot)
-      hash
-    }
 
     context 'given a response with status code different than 200' do
       let (:resp) {
@@ -88,7 +77,9 @@ describe GoogleClient do
       }
 
       it 'raises an HTTPError' do
-        expect { client.send(:get_map_image, req, resp) }.to raise_error(HTTPError)
+        expect { client.send(:get_map_image, resp) }.to raise_error(HTTPError) { |error|
+          expect(error.to_s).to eq("HTTP Error: #{resp.code}")
+        }
       end
     end
 
@@ -96,15 +87,16 @@ describe GoogleClient do
       let (:resp) {
         hash = {
           'code' => '200',
-          'Content-Type' => 'text/html; charset=UTF-8',
-          'body' => "<html><body><div>Hello World!</div></body></html>"
+          'content_type' => {:mime_type => 'text/html', :charset=>'UTF-8'}.extend(HashDot),
+          'body' => "<html><body><div>Hello World!</div></body></html>",
+          'uri' => HTTP::URI.parse("https://google.be/")
         }
         hash.extend(HashDot)
         hash
       }
 
       it 'returns a hash with media information (URL, MIME type and Base64-encoded value)' do
-        expect(client.send(:get_map_image, req, resp)).to eql({
+        expect(client.send(:get_map_image, resp)).to eql({
           :url => 'https://google.be/',
           :mime_type => 'text/html',
           :image_data => 'PGh0bWw+PGJvZHk+PGRpdj5IZWxsbyBXb3JsZCE8L2Rpdj48L2JvZHk+PC9odG1sPg=='

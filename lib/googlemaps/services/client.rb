@@ -3,9 +3,9 @@ require 'googlemaps/services/exceptions'
 require 'googlemaps/services/version'
 require 'googlemaps/services/util'
 require 'nokogiri'
-require 'net/http'
 require 'base64'
 require 'json'
+require 'http'
 
 # Core functionality, common across all API requests.
 #
@@ -15,28 +15,33 @@ module GoogleMaps
   #
   # @since 1.0.0
   module Services
-    USER_AGENT = 'GoogleMapsRubyClient/' + VERSION
-    DEFAULT_BASE_URL = 'https://maps.googleapis.com'
-    RETRIABLE_STATUSES = [500, 503, 504]
 
     # Performs requests to the Google Maps API web services.
     class GoogleClient
+      USER_AGENT = 'GoogleMapsRubyClient/' + VERSION
+      DEFAULT_BASE_URL = 'https://maps.googleapis.com'
+      RETRIABLE_STATUSES = [500, 503, 504]
+
       include GoogleMaps::Services::Exceptions
 
       # @return [Symbol] API key. Required, unless "client_id" and "client_secret" are set.
       attr_accessor :key
-      # @return [Symbol] timeout Combined connect and read timeout for HTTP requests, in seconds.
-      attr_accessor :timeout
+      # @return [Symbol] Write timeout for the HTTP request, in seconds.
+      attr_accessor :write_timeout
+      # @return [Symbol] Connect timeout for the HTTP request, in seconds.
+      attr_accessor :connect_timeout
+      # @return [Symbol] Read timeout for the HTTP request, in seconds.
+      attr_accessor :read_timeout
       # @return [Symbol] Client ID (for Maps API for Work).
       attr_accessor :client_id
-      # @return [Symbol] base64-encoded client secret (for Maps API for Work).
+      # @return [Symbol] Base64-encoded client secret (for Maps API for Work).
       attr_accessor :client_secret
-      # @return [Symbol] attribute used for tracking purposes. Can only be used with a Client ID.
+      # @return [Symbol] Attribute used for tracking purposes. Can only be used with a Client ID.
       attr_accessor :channel
-      # @return [Symbol] timeout across multiple retriable requests, in seconds.
+      # @return [Symbol] Timeout across multiple retriable requests, in seconds.
       attr_accessor :retry_timeout
-      # @return [Symbol] extra options for Net::HTTP client.
-      attr_accessor :request_opts
+      # @return [Symbol] HTTP headers per request.
+      attr_accessor :request_headers
       # @return [Symbol] number of queries per second permitted. If the rate limit is reached, the client will sleep for the appropriate amout of time before it runs the current query.
       attr_accessor :queries_per_second
       # @return [Symbol] keeps track of sent queries.
@@ -44,8 +49,8 @@ module GoogleMaps
       # @return [Symbol] Response format. Either :json or :xml
       attr_accessor :response_format
 
-      def initialize(key:, client_id: nil, client_secret: nil, timeout: nil,
-                     connect_timeout: nil, read_timeout: nil,retry_timeout: 60, request_opts: {},
+      def initialize(key:, client_id: nil, client_secret: nil, write_timeout: 1,
+                     connect_timeout: 1, read_timeout: 1,retry_timeout: 60, request_headers: {},
                      queries_per_second: 10, channel: nil, response_format: :json)
         if !key && !(client_secret && client_id)
           raise StandardError, 'Must provide API key or enterprise credentials when creationg client.'
@@ -67,25 +72,16 @@ module GoogleMaps
 
         self.key = key
 
-        if timeout && (connect_timeout || read_timeout)
-          raise StandardError, 'Specify either timeout, or connect_timeout and read_timeout.'
-        end
-
-        if connect_timeout && read_timeout
-          self.timeout = { :connect_timeout => connect_timeout, :read_timeout => read_timeout }
-        else
-          self.timeout = timeout
-        end
+        # Set the timeout for write/connect/read calls
+        self.write_timeout = write_timeout
+        self.connect_timeout = connect_timeout
+        self.read_timeout = read_timeout
 
         self.client_id = client_id
         self.client_secret = client_secret
         self.channel = channel
         self.retry_timeout = retry_timeout
-        self.request_opts = request_opts.merge({
-                                                   :headers => {'User-Agent' => USER_AGENT},
-                                                   :timeout => self.timeout,
-                                                   :verify => true
-                                               })
+        self.request_headers = request_headers.merge({ 'User-Agent' => USER_AGENT })
         self.queries_per_second = queries_per_second
         self.sent_times = Array.new
 
@@ -105,11 +101,11 @@ module GoogleMaps
       # @param [TrueClass, FalseClass] accepts_clientid Flag whether this call supports the client/signature params. Some APIs require API keys (e.g. Roads).
       # @param [Proc] extract_body A function that extracts the body from the request. If the request was not successful, the function should raise a
       #               GoogleMaps::Services::Exceptions::HTTPError or GoogleMaps::Services::Exceptions::APIError as appropriate.
-      # @param [Hash] request_opts Additional options for the Net::HTTP client.
+      # @param [Hash] request_headers HTTP headers per request.
       #
       # @return [Hash, Array, nil] response body (either in JSON or XML) or nil.
       def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: DEFAULT_BASE_URL,
-              accepts_clientid: true, extract_body: nil, request_opts: nil)
+              accepts_clientid: true, extract_body: nil, request_headers: nil)
         unless first_request_time
           first_request_time = Util.current_time
         end
@@ -130,35 +126,21 @@ module GoogleMaps
 
         authed_url = generate_auth_url(url, params, accepts_clientid)
 
-        # Default to the client-level self.request_opts, with method-level
-        # request_opts arg overriding.
-        request_opts = self.request_opts.merge(request_opts || {})
+        # Default to the client-level self.request_headers, with method-level
+        # request_headers arg overriding.
+        request_headers = self.request_headers.merge(request_headers || {})
 
         # Construct the Request URI
-        uri = URI.parse(base_url + authed_url)
+        uri = HTTP::URI.parse(base_url + authed_url)
 
-        # Create the request and add the headers
-        req = Net::HTTP::Get.new(uri.to_s)
-        request_opts[:headers].each { |header,value| req.add_field(header, value) }
-
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = (uri.scheme == 'https')
-
-        # Get the HTTP response
-        resp = http.request(req)
-
-        # Handle response errors
-        case resp
-        when Net::HTTPRequestTimeOut
-          raise Timeout
-        when Exception
-          raise TransportError, 'HTTP GET request failed.'
-        end
+        # Create the request, add the headers and make the GET request
+        resp = HTTP.headers(request_headers)
+                   .timeout(:write => self.write_timeout, :connect => self.connect_timeout, :read => self.read_timeout)
+                   .get(uri.to_s)
 
         if RETRIABLE_STATUSES.include? resp.code.to_i
           # Retry request
-          self.get(url, params, first_request_time, retry_counter + 1,
-                   base_url, accepts_clientid, extract_body)
+          self.get(url, params, first_request_time, retry_counter + 1, base_url, accepts_clientid, extract_body)
         end
 
         # Check if the time of the nth previous query (where n is queries_per_second)
@@ -175,8 +157,7 @@ module GoogleMaps
           if extract_body
             result = extract_body.call(resp)
           else
-            mime_type = Convert.get_mime_type(resp['Content-Type'])
-            case mime_type
+            case resp.content_type.mime_type
             when 'application/xml'
               result = get_xml_body(resp)
             when 'application/json'
@@ -184,7 +165,7 @@ module GoogleMaps
             when 'text/html'
               result = get_redirection_url(resp)
             else
-              result = get_map_image(req, resp)
+              result = get_map_image(resp)
             end
           end
           self.sent_times.push(Util.current_time)
@@ -289,7 +270,7 @@ module GoogleMaps
       # @param [Net::HTTPResponse] resp HTTP response object.
       #
       # @return [Hash] Hash with image URL, MIME type and its base64-encoded value.
-      def get_map_image(req, resp)
+      def get_map_image(resp)
         status_code = resp.code.to_i
 
         if status_code != 200
@@ -297,8 +278,8 @@ module GoogleMaps
         end
 
         {
-          :url => req.path,
-          :mime_type => Convert.get_mime_type(resp['Content-Type']),
+          :url => resp.uri.to_s,
+          :mime_type => resp.content_type.mime_type,
           :image_data => Base64.encode64(resp.body).gsub(/\n/, '')
         }
       end
