@@ -7,33 +7,46 @@ include GoogleMaps::Services::Exceptions
 
 
 describe GoogleClient do
-
   describe '#get' do
     context 'given no API key' do
-      let (:client) { GoogleClient.new(key: nil) }
-      it 'raises an error' do
-        expect { client.get(url: '/path/to/service', params: {}) }.to raise_error(StandardError)
+      let (:client) { GoogleClient.new }
+      it 'raises a StandardError exception' do
+        expect { client.get(url: '/path/to/service', params: {}) }.to raise_error {|error|
+          expect(error).to be_a(StandardError)
+          expect(error.to_s).to eq('Must provide API key or enterprise credentials when creationg client.')
+        }
       end
     end
 
     context "given an API key that does not start with 'AIza'" do
       let (:client) { GoogleClient.new(key: 'dGhpcyBpcyBhIGtleQ==') }
-      it 'raises an error' do
-        expect { client.get(url: '/path/to/service', params: {}) }.to raise_error(StandardError)
+      it 'raises a StandardError exception' do
+        expect { client.get(url: '/path/to/service', params: {}) }.to raise_error {|error|
+          expect(error).to be_a(StandardError)
+          expect(error.to_s).to eq('Invalid API key provided.')
+        }
       end
     end
 
     context 'given a channel with no client ID' do
-      let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', channel: 'chan_attr') }
-      it 'raises an error' do
-        expect { client.get(url: '/path/to/service', params: {}) }.to raise_error(StandardError)
+      let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', channel: 'azBze_Ejj34.') }
+      it 'raises a StandardError exception' do
+        expect { client.get(url: '/path/to/service', params: {}) }.to raise_error {|error|
+          expect(error).to be_a(StandardError)
+          expect(error.to_s).to eq('The channel argument must be used with a client ID.')
+        }
       end
     end
 
     context 'given a non-alphanumeric channel string' do
-      let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', channel: 'chan_attr') }
+      let (:client) {
+        GoogleClient.new(client_id: 'AIzadGhpcyBpc==', client_secret: 'yBhIGtleQ', channel: '+=er10)=')
+      }
       it 'raises an error' do
-        expect { client.get(url: '/path/to/services', params: {}) }.to raise_error(StandardError)
+        expect { client.get(url: '/path/to/services', params: {}) }.to raise_error {|error|
+          expect(error).to be_a(StandardError)
+          expect(error.to_s).to eq('The channel argument must be an ASCII alphanumeric string. The period (.), underscore (_) and hyphen (-) characters are allowed.')
+        }
       end
     end
   end
