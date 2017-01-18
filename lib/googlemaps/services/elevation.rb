@@ -10,6 +10,8 @@ module GoogleMaps
     #   elevation = GoogleMaps::Services::Elevation.new(client)
     #   result = elevation.query(locations: [{:lat => 52.520645, :lng => 13.409779}, "Brussels"])
     class Elevation
+
+      # @return [Symbol] The HTTP client.
       attr_accessor :client
 
       def initialize(client)
