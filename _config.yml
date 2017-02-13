@@ -1,0 +1,8 @@
+title: Googlemaps-services
+description: Ruby client library for Google Maps API Web Services
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-minimal
+
+gems:
+  - jekyll-mentions
