@@ -42,6 +42,8 @@ module GoogleMaps
       # @param [String, Array] path The single path of two or more connected points to overlay in the image at the specified locations.
       # @param [String, Array] visible One or more locations that should remain visible on the map.
       # @param [String] style A custom style to alter the presentation of a specific feature (roads, parks, and other features) of the map.
+      #
+      # @return [Hash] Hash with image URL, MIME type and its base64-encoded value.
       def query(size:, center: nil, zoom: nil, scale: 1, format: "png", maptype: "roadmap",
                 language: nil, region: nil, markers: nil, path: nil, visible: nil, style: nil)
         params = { 'size' => Convert.rectangular_dimensions(size) }
