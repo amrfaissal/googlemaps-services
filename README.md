@@ -18,6 +18,7 @@ The Ruby Client for Google Maps Services is a Ruby Client library for the follow
  - [Roads API]
  - [Places API]
  - [Static Maps API]
+ - [Street View Image API]
 
 It supports both JSON and XML response formats.
 
@@ -90,3 +91,4 @@ The gem is available as open source under the terms of the [MIT License](http://
 [Roads API]: https://developers.google.com/maps/documentation/roads/
 [Places API]: https://developers.google.com/places/
 [Static Maps API]: https://developers.google.com/maps/documentation/static-maps/
+[Street View Image API]: https://developers.google.com/maps/documentation/streetview/
