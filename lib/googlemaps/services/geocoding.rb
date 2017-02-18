@@ -67,7 +67,7 @@ module GoogleMaps
     # Performs requests to the Google Maps Geocoding API.
     #
     # @example
-    #   reverse_geocode = GoogleMaps::Services::ReverseGeocode(client)
+    #   reverse_geocode = GoogleMaps::Services::ReverseGeocode.new(client)
     #   result = reverse_geocode.query(latlng: {:lat => 52.520645, :lng => 13.409779}, language: "fr")
     class ReverseGeocode
       attr_accessor :client
