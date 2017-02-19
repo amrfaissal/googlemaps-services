@@ -105,9 +105,7 @@ module GoogleMaps
       # @return [Hash, Array, nil] response body (either in JSON or XML) or nil.
       def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: DEFAULT_BASE_URL,
               accepts_clientid: true, extract_body: nil, request_headers: nil)
-        unless first_request_time
-          first_request_time = Util.current_time
-        end
+        first_request_time = Util.current_time unless first_request_time
 
         elapsed = Time.now - first_request_time
         if elapsed > self.retry_timeout
@@ -120,7 +118,7 @@ module GoogleMaps
           # at 1, so subtract that first.
           delay_seconds = 0.5 * 1.5 ** (retry_counter - 1)
           # Jitter this value by 50% and pause.
-          sleep(delay_seconds * (random.random + 0.5))
+          sleep(delay_seconds * (Random.rand + 0.5))
         end
 
         authed_url = generate_auth_url(url, params, accepts_clientid)
@@ -219,8 +217,6 @@ module GoogleMaps
 
         if body.key?('error_message')
           raise APIError.new(api_status), body['error_message']
-        else
-          raise APIError.new(api_status)
         end
       end
 
