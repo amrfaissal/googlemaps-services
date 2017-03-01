@@ -142,6 +142,42 @@ describe GoogleClient do
         expect { client.send(:get_json_body, resp) }.to raise_error(APIError)
       end
     end
+
+    context 'given an OK or ZERO_RESULTS status' do
+      let (:resp) {
+        hash = {'body' => '{"status": "OK", "response":[]}', 'code' => '200'}
+        hash.extend(HashDot)
+        hash
+      }
+      it 'returns the response JSON body' do
+        response = client.send(:get_json_body, resp)
+        expect(response.is_a? Hash).to eq(true)
+        expect(response.empty?).to eq(false)
+        expect(response["status"]).to eq("OK")
+      end
+    end
+
+    context 'given an OVER_QUERY_LIMIT status' do
+      let (:resp) {
+        hash = {'body' => '{"status": "OVER_QUERY_LIMIT", "error_message": "daily quota reached"}', 'code' => '200'}
+        hash.extend(HashDot)
+        hash
+      }
+      it 'raises a RetriableRequest exception' do
+        expect { client.send(:get_json_body, resp)}.to raise_error(RetriableRequest)
+      end
+    end
+
+    context 'given an errored response' do
+      let (:resp) {
+        hash = {'body' => '{"status": "INVALID_REQUEST", "error_message": "something went wrong"}', 'code' => '200'}
+        hash.extend(HashDot)
+        hash
+      }
+      it 'raises an APIError exception' do
+        expect { client.send(:get_json_body, resp) }.to raise_error(APIError, "something went wrong")
+      end
+    end
   end
 
   describe '#get_xml_body' do
