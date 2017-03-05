@@ -253,8 +253,6 @@ module GoogleMaps
         error_message = doc.xpath('//error_message')
         if error_message
           raise APIError.new(api_status), error_message.text
-        else
-          raise APIError.new(api_status)
         end
       end
 
@@ -300,12 +298,10 @@ module GoogleMaps
           return path + '&signature=' + sig
         end
 
-        if self.key
-          params['key'] = self.key
-          return path + '?' + Util.urlencode_params(params)
-        end
+        raise StandardError, 'Must provide API key for this API. It does not accept enterprise credentials.' unless self.key
 
-        raise StandardError, 'Must provide API key for this API. It does not accept enterprise credentials.'
+        params['key'] = self.key
+        return path + '?' + Util.urlencode_params(params)
       end
 
       private :get_json_body, :get_xml_body, :get_map_image, :get_redirection_url, :generate_auth_url
