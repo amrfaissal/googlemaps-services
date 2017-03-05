@@ -1,5 +1,5 @@
 module GoogleMaps
   module Services
-    VERSION = '1.3.0'.freeze
+    VERSION = '1.3.5'.freeze
   end
 end
