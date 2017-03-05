@@ -181,7 +181,7 @@ describe GoogleClient do
   end
 
   describe '#get_xml_body' do
-    let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
+    let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', response_format: :xml) }
 
     context 'given a response with status code different than 200' do
       let (:resp) {
@@ -205,13 +205,52 @@ describe GoogleClient do
         expect { client.send(:get_xml_body, resp) }.to raise_error(APIError)
       end
     end
+
+    context 'given an OK or ZERO_RESULTS status' do
+      let (:resp) {
+        hash = {'body' => '<Response><status>OK</status><result><type>establishment</type></result></Response>', 'code' => '200'}
+        hash.extend(HashDot)
+        hash
+      }
+      it 'returns the response XML body' do
+        response = client.send(:get_xml_body, resp)
+        expect(response.is_a? Nokogiri::XML::Document).to eq(true)
+        expect(response.xpath("//Response/status").text).to eq("OK")
+      end
+    end
+
+    context 'given an OVER_QUERY_LIMIT status' do
+      let (:resp) {
+        hash = {'body' => '<Response><status>OVER_QUERY_LIMIT</status><error_message>Daily quota reached</error_message></Response>', 'code' => '200'}
+        hash.extend(HashDot)
+        hash
+      }
+      it 'raises a RetriableRequest exception' do
+        expect { client.send(:get_xml_body, resp)}.to raise_error(RetriableRequest)
+      end
+    end
+
+    context 'given an errored response' do
+      let (:resp) {
+        hash = {'body' => '<Response><status>INVALID_REQUEST</status><error_message>something went wrong</error_message></Response>', 'code' => '200'}
+        hash.extend(HashDot)
+        hash
+      }
+      it 'raises an APIError exception' do
+        expect { client.send(:get_xml_body, resp) }.to raise_error(APIError, "something went wrong")
+      end
+    end
   end
 
   describe '#generate_auth_url' do
-    context 'given no API key' do
-      let (:client) { GoogleClient.new(key: nil) }
-      it 'raises an error' do
-        expect { client.send(:generate_auth_url, '/path/to/service', false) }.to raise_error(StandardError)
+    context 'given both client_id and client_secret' do
+      let (:client) {
+        GoogleClient.new(client_id: "104-rdqt7.apps.googleusercontent.com", client_secret: "UOjXRXBibmBCwTNQ2RZKCxn3", channel:"chan-y87z")
+      }
+      it 'returns an auth URL with encoded signature and parameters' do
+        expect(
+          client.send(:generate_auth_url, '/path/to/service', true)
+        ).to eql("/path/to/service?channel=chan-y87z&client=104-rdqt7.apps.googleusercontent.com&signature=IsxUgkXqYS7c2nqYHwUONboD7VA=")
       end
     end
 
@@ -221,6 +260,13 @@ describe GoogleClient do
         expect(
           client.send(:generate_auth_url, '/path/to/service', {'param1' => 'value'}, false)
         ).to eql('/path/to/service?param1=value&key=AIzadGhpcyBpcyBhIGtleQ%3D%3D')
+      end
+    end
+
+    context 'given no API key' do
+      let (:client) { GoogleClient.new(key: nil) }
+      it 'raises an error' do
+        expect { client.send(:generate_auth_url, '/path/to/service', false) }.to raise_error(StandardError)
       end
     end
   end
