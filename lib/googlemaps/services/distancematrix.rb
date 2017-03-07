@@ -1,3 +1,4 @@
+require 'googlemaps/services/global_constants'
 require 'googlemaps/services/util'
 
 module GoogleMaps
@@ -8,8 +9,6 @@ module GoogleMaps
     #   distancematrix = GoogleMaps::Services::DistanceMatrix.new(client)
     #   result = distancematrix.query(origins: ["Brussels", "Ghent"], destinations: ["Bruges"])
     class DistanceMatrix
-      AVOIDS = %w(tolls highways ferries)
-      TRAVEL_MODES = %w(driving walking bicycling transit)
 
       # @return [Symbol] the HTTP client.
       attr_accessor :client
@@ -46,7 +45,7 @@ module GoogleMaps
         }
 
         if mode
-          raise StandardError, 'Invalid travel mode.' unless TRAVEL_MODES.include? mode
+          raise StandardError, 'Invalid travel mode.' unless Constants::TRAVEL_MODES.include? mode
           params['mode'] = mode
         end
 
@@ -55,7 +54,7 @@ module GoogleMaps
         end
 
         if avoid
-          raise StandardError, 'Invalid route restriction.' unless AVOIDS.include? avoid
+          raise StandardError, 'Invalid route restriction.' unless Constants::AVOID_FEATURES.include? avoid
           params['avoid'] = avoid
         end
 

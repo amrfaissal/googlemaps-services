@@ -1,10 +1,8 @@
+require 'googlemaps/services/global_constants'
 require 'googlemaps/services/util'
 
 module GoogleMaps
   module Services
-    ALLOWED_SCALES = [2, 4]
-    SUPPORTED_IMG_FORMATS = ["png32", "gif", "jpg", "jpg-baseline"]
-    SUPPORTED_MAP_TYPES = ["satellite", "hybrid", "terrain"]
 
     # Performs requests to the Google Static Map API.
     #
@@ -58,17 +56,17 @@ module GoogleMaps
         end
 
         if scale != 1
-          raise StandardError, "invalid scale value." unless ALLOWED_SCALES.include? scale
+          raise StandardError, "invalid scale value." unless Constants::ALLOWED_SCALES.include? scale
           params['scale'] = scale
         end
 
         if format != "png"
-          raise StandardError, "invalid image format." unless SUPPORTED_IMG_FORMATS.include? format
+          raise StandardError, "invalid image format." unless Constants::SUPPORTED_IMG_FORMATS.include? format
           params['format'] = format
         end
 
         if maptype != "roadmap"
-          raise StandardError, "invalid maptype value." unless SUPPORTED_MAP_TYPES.include? maptype
+          raise StandardError, "invalid maptype value." unless Constants::SUPPORTED_MAP_TYPES.include? maptype
           params['maptype'] = maptype
         end
 

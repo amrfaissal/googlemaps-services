@@ -1,10 +1,10 @@
+require 'googlemaps/services/global_constants'
 require 'googlemaps/services/exceptions'
 require 'googlemaps/services/util'
 require 'json'
 
 module GoogleMaps
   module Services
-    ROADS_BASE_URL = 'https://roads.googleapis.com'
 
     # Performs requests to the Google Maps Roads API.
     class Roads
@@ -34,7 +34,7 @@ module GoogleMaps
           params['interpolate'] = 'true'
         end
 
-        self.client.get(url: '/v1/snapToRoads', params: params, base_url: ROADS_BASE_URL,
+        self.client.get(url: '/v1/snapToRoads', params: params, base_url: Constants::ROADS_BASE_URL,
                         accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
       end
 
@@ -49,7 +49,7 @@ module GoogleMaps
 
         params = {'placeId' => place_ids}
 
-        self.client.get(url: '/v1/speedLimits', params: params, base_url: ROADS_BASE_URL,
+        self.client.get(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
                         accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['speedLimits']
       end
 
@@ -62,7 +62,7 @@ module GoogleMaps
       def snapped_speed_limits(path:)
         params = {'path' => Convert.piped_location(path)}
 
-        self.client.get(url: '/v1/speedLimits', params: params, base_url: ROADS_BASE_URL,
+        self.client.get(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
                         accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))
       end
 
@@ -76,7 +76,7 @@ module GoogleMaps
       def nearest_roads(points:)
         params = {'points' => Convert.piped_location(points)}
 
-        self.client.get(url: '/v1/nearestRoads', params: params, base_url: ROADS_BASE_URL,
+        self.client.get(url: '/v1/nearestRoads', params: params, base_url: Constants::ROADS_BASE_URL,
                         accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
       end
 
@@ -118,5 +118,6 @@ module GoogleMaps
 
       private :_roads_extract
     end
+
   end
 end

@@ -1,6 +1,6 @@
 # coding: utf-8
+require 'googlemaps/services/global_constants'
 require 'googlemaps/services/exceptions'
-require 'googlemaps/services/version'
 require 'googlemaps/services/util'
 require 'nokogiri'
 require 'base64'
@@ -18,10 +18,6 @@ module GoogleMaps
 
     # Performs requests to the Google Maps API web services.
     class GoogleClient
-      USER_AGENT = 'GoogleMapsRubyClient/' + VERSION
-      DEFAULT_BASE_URL = 'https://maps.googleapis.com'
-      RETRIABLE_STATUSES = [500, 503, 504]
-
       include GoogleMaps::Services::Exceptions
 
       # @return [Symbol] API key. Required, unless "client_id" and "client_secret" are set.
@@ -80,7 +76,7 @@ module GoogleMaps
         self.client_secret = client_secret
         self.channel = channel
         self.retry_timeout = retry_timeout
-        self.request_headers = request_headers.merge({ 'User-Agent' => USER_AGENT })
+        self.request_headers = request_headers.merge({ 'User-Agent' => Constants::USER_AGENT })
         self.queries_per_second = queries_per_second
         self.sent_times = Array.new
 
@@ -103,7 +99,7 @@ module GoogleMaps
       # @param [Hash] request_headers HTTP headers per request.
       #
       # @return [Hash, Array, nil] response body (either in JSON or XML) or nil.
-      def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: DEFAULT_BASE_URL,
+      def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: Constants::DEFAULT_BASE_URL,
               accepts_clientid: true, extract_body: nil, request_headers: nil)
         first_request_time = Util.current_time unless first_request_time
 
@@ -135,7 +131,7 @@ module GoogleMaps
                    .timeout(:write => self.write_timeout, :connect => self.connect_timeout, :read => self.read_timeout)
                    .get(uri.to_s)
 
-        if RETRIABLE_STATUSES.include? resp.code.to_i
+        if Constants::RETRIABLE_STATUSES.include? resp.code.to_i
           # Retry request
           self.get(url, params, first_request_time, retry_counter + 1, base_url, accepts_clientid, extract_body)
         end

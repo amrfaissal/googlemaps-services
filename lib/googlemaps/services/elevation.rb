@@ -1,6 +1,5 @@
 require 'googlemaps/services/util'
 
-
 module GoogleMaps
   module Services
 

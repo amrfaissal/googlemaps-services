@@ -1,3 +1,4 @@
+require 'googlemaps/services/global_constants'
 require 'googlemaps/services/util'
 
 module GoogleMaps
@@ -8,8 +9,6 @@ module GoogleMaps
     #   directions = GoogleMaps::Services::Directions.new(client)
     #   result = directions.query(origin: "Brussels", destination: {:lat => 52.520645, :lng => 13.409779})
     class Directions
-      TRAVEL_MODES = %w(driving walking bicycling transit)
-      AVOID_FEATURES = %w(tolls highways ferries indoor)
 
       # @return [Symbol] The HTTP client.
       attr_accessor :client
@@ -54,7 +53,7 @@ module GoogleMaps
         }
 
         if mode
-          unless TRAVEL_MODES.include? mode
+          unless Constants::TRAVEL_MODES.include? mode
             raise StandardError, 'invalid travel mode.'
           end
           params['mode'] = mode
@@ -73,7 +72,7 @@ module GoogleMaps
         end
 
         if avoid
-          unless ArrayBox.contains_all?(AVOID_FEATURES, avoid)
+          unless ArrayBox.contains_all?(Constants::AVOID_FEATURES, avoid)
             raise StandardError, 'invalid avoid feature.'
           end
           params['avoid'] = Convert.join_array('|', avoid)
