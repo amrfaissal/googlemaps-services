@@ -116,9 +116,9 @@ module GoogleMaps
 
         case self.client.response_format
         when :xml
-          self.client.get(url: '/maps/api/directions/xml', params: params).xpath('//route')
+          self.client.request(url: '/maps/api/directions/xml', params: params).xpath('//route')
         when :json
-          self.client.get(url: '/maps/api/directions/json', params: params)['routes']
+          self.client.request(url: '/maps/api/directions/json', params: params)['routes']
         else
           raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end

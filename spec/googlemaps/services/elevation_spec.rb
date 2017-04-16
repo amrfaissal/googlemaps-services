@@ -8,7 +8,7 @@ describe Elevation do
   let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
   let (:elevation) { Elevation.new(client) }
   before {
-    allow(client).to receive(:get).and_return({'results' => []})
+    allow(client).to receive(:request).and_return({'results' => []})
   }
 
   describe '#query' do
@@ -61,7 +61,7 @@ describe Elevation do
     context 'given a response format of value :xml' do
       before {
         xml = "<result></result>"
-        allow(client).to receive(:get).and_return(Nokogiri::XML(xml))
+        allow(client).to receive(:request).and_return(Nokogiri::XML(xml))
         client.response_format = :xml
       }
       it 'returns an XML NodeSet' do

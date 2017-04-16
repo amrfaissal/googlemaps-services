@@ -8,8 +8,11 @@ module Constants
   # The User-Agent header
   USER_AGENT = 'GoogleMapsRubyClient/' + GoogleMaps::Services::VERSION
 
-  # The default base URL for all requests
+  # The default base URL for all Google Maps requests
   DEFAULT_BASE_URL = 'https://maps.googleapis.com'
+
+  # The default base URL for all Google APIs requests
+  GOOGLEAPIS_BASE_URL = 'https://www.googleapis.com'
 
   # HTTP statuses that will trigger a retry request
   RETRIABLE_STATUSES = [500, 503, 504]
@@ -31,4 +34,7 @@ module Constants
 
   # The supported map types
   SUPPORTED_MAP_TYPES = ["satellite", "hybrid", "terrain"]
+
+  # The supported mobile radio types
+  SUPPORTED_RADIO_TYPES = %w(lte gsm cdma wcdma)
 end

@@ -86,7 +86,7 @@ module GoogleMaps
         end
       end
 
-      # Performs HTTP GET requests with credentials, returning the body as JSON or XML.
+      # Performs HTTP GET/POST requests with credentials, returning the body as JSON or XML.
       #
       # @param [String] url URL path for the request. Should begin with a slash.
       # @param [Hash] params HTTP GET parameters.
@@ -97,10 +97,11 @@ module GoogleMaps
       # @param [Proc] extract_body A function that extracts the body from the request. If the request was not successful, the function should raise a
       #               GoogleMaps::Services::Exceptions::HTTPError or GoogleMaps::Services::Exceptions::APIError as appropriate.
       # @param [Hash] request_headers HTTP headers per request.
+      # @param [Hash] post_json The request body which will be formatted as JSON.
       #
       # @return [Hash, Array, nil] response body (either in JSON or XML) or nil.
-      def get(url:, params:, first_request_time: nil, retry_counter: nil, base_url: Constants::DEFAULT_BASE_URL,
-              accepts_clientid: true, extract_body: nil, request_headers: nil)
+      def request(url:, params:, first_request_time: nil, retry_counter: nil, base_url: Constants::DEFAULT_BASE_URL,
+              accepts_clientid: true, extract_body: nil, request_headers: nil, post_json: nil)
         first_request_time = Util.current_time unless first_request_time
 
         elapsed = Time.now - first_request_time
@@ -126,14 +127,16 @@ module GoogleMaps
         # Construct the Request URI
         uri = HTTP::URI.parse(base_url + authed_url)
 
-        # Create the request, add the headers and make the GET request
-        resp = HTTP.headers(request_headers)
-                   .timeout(:write => self.write_timeout, :connect => self.connect_timeout, :read => self.read_timeout)
-                   .get(uri.to_s)
+        # Create the request, add the headers & timeouts
+        req = HTTP.headers(request_headers)
+                .timeout(:write => self.write_timeout, :connect => self.connect_timeout, :read => self.read_timeout)
+
+        # Make the HTTP GET/POST request
+        resp = post_json ? req.post(uri.to_s, :json => post_json) : req.get(uri.to_s)
 
         if Constants::RETRIABLE_STATUSES.include? resp.code.to_i
           # Retry request
-          self.get(url, params, first_request_time, retry_counter + 1, base_url, accepts_clientid, extract_body)
+          self.request(url, params, first_request_time, retry_counter + 1, base_url, accepts_clientid, extract_body, post_json)
         end
 
         # Check if the time of the nth previous query (where n is queries_per_second)
@@ -165,7 +168,7 @@ module GoogleMaps
           return result
         rescue RetriableRequest
           # Retry request
-          return self.get(url, params, first_request_time, retry_counter + 1, base_url, accepts_clientid, extract_body)
+          return self.request(url, params, first_request_time, retry_counter + 1, base_url, accepts_clientid, extract_body, post_json)
         end
       end
 

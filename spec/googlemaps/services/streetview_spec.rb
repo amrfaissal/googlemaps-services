@@ -7,7 +7,7 @@ describe StreetViewImage do
   let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
   let (:streetview) { StreetViewImage.new(client) }
   before {
-    allow(client).to receive(:get).and_return({
+    allow(client).to receive(:request).and_return({
                                                 :url => "https://maps.googleapis.com/maps/api/streetview?size=640x400&location=40.714728%2C-73.998672&heading=151.78&pitch=-0.76",
                                                 :mime_type => "image/jpeg",
                                                 :image_data => "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHR..."

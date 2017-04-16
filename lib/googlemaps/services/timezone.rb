@@ -35,7 +35,7 @@ module GoogleMaps
           params['language'] = language
         end
 
-        self.client.get(url: "/maps/api/timezone/#{self.client.response_format}", params: params)
+        self.client.request(url: "/maps/api/timezone/#{self.client.response_format}", params: params)
       end
     end
 

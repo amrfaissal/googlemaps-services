@@ -7,7 +7,7 @@ describe Places do
   let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
   let (:places) { Places.new(client) }
   before {
-    allow(client).to receive(:get).and_return({})
+    allow(client).to receive(:request).and_return({})
   }
 
   describe '#search' do
@@ -97,7 +97,7 @@ describe Places do
     context 'given a photo reference with max_width or max_height' do
       it 'returns URL of the photo' do
         expected = 'https://lh4.googleusercontent.com/-1wzlVdxiW14/USSFZnhNqxI/AAAAAAAABGw/YpdANqaoGh4/s1600-w400/Google%2BSydney'
-        allow(client).to receive(:get).and_return(expected)
+        allow(client).to receive(:request).and_return(expected)
         photo_ref = 'CnRvAAAAwMpdHeWlXl-lH0vp7lez4znKPIWSWvgvZFISdKx45AwJVP1Qp37YOrH7sqHMJ8C-vBDC546decipPHchJhHZL94RcTUfPa1jWzo-rSHaTlbNtjh-N68RkcToUCuY9v2HNpo5mziqkir37WU    8FJEqVBIQ4k938TI3e7bf8xq-uwDZcxoUbO_ZJzPxremiQurAYzCTwRhE_V0'
         expect(places.place_photo(photo_reference: photo_ref, max_width: 400, max_height: 600)).to eq(expected)
       end
@@ -119,7 +119,7 @@ describe Places do
 
     context 'given a response format of value :json' do
       before {
-        allow(client).to receive(:get).and_return({'predictions' => []})
+        allow(client).to receive(:request).and_return({'predictions' => []})
       }
       it 'returns an array of predictions' do
         client.response_format = :json
@@ -163,7 +163,7 @@ describe Places do
                   </prediction>
                 </AutocompletionResponse>
         XML
-        allow(client).to receive(:get).and_return(Nokogiri::XML(xml))
+        allow(client).to receive(:request).and_return(Nokogiri::XML(xml))
       }
 
       it 'returns an XML NodeSet of predictions' do
@@ -185,7 +185,7 @@ describe Places do
 
   describe '#autocomplete_query' do
     it 'returns an array of place predictions given a search query' do
-      allow(client).to receive(:get).and_return({'predictions' => []})
+      allow(client).to receive(:request).and_return({'predictions' => []})
       expect(places.autocomplete_query(input_text: 'pizza near Brussels',
           offset: 6,
           location: "50.9472095,4.0028986",

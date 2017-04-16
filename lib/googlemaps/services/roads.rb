@@ -34,7 +34,7 @@ module GoogleMaps
           params['interpolate'] = 'true'
         end
 
-        self.client.get(url: '/v1/snapToRoads', params: params, base_url: Constants::ROADS_BASE_URL,
+        self.client.request(url: '/v1/snapToRoads', params: params, base_url: Constants::ROADS_BASE_URL,
                         accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
       end
 
@@ -49,7 +49,7 @@ module GoogleMaps
 
         params = {'placeId' => place_ids}
 
-        self.client.get(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
+        self.client.request(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
                         accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['speedLimits']
       end
 
@@ -62,7 +62,7 @@ module GoogleMaps
       def snapped_speed_limits(path:)
         params = {'path' => Convert.piped_location(path)}
 
-        self.client.get(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
+        self.client.request(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
                         accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))
       end
 
@@ -76,15 +76,15 @@ module GoogleMaps
       def nearest_roads(points:)
         params = {'points' => Convert.piped_location(points)}
 
-        self.client.get(url: '/v1/nearestRoads', params: params, base_url: Constants::ROADS_BASE_URL,
+        self.client.request(url: '/v1/nearestRoads', params: params, base_url: Constants::ROADS_BASE_URL,
                         accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
       end
 
-      # Extracts a result from a Roads API HTTP response.
+      # Extracts result from the Roads API HTTP response.
       #
       # @private
       #
-      # @param [Net::HTTPResponse] resp HTTP response object.
+      # @param [HTTP::Response] resp HTTP response object.
       #
       # @return [Hash, Array] Valid JSON response.
       def _roads_extract(resp)

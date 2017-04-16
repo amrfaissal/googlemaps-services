@@ -7,11 +7,11 @@ include GoogleMaps::Services::Exceptions
 
 
 describe GoogleClient do
-  describe '#get' do
+  describe '#request' do
     context 'given no API key' do
       let (:client) { GoogleClient.new }
       it 'raises a StandardError exception' do
-        expect { client.get(url: '/path/to/service', params: {}) }.to raise_error {|error|
+        expect { client.request(url: '/path/to/service', params: {}) }.to raise_error {|error|
           expect(error).to be_a(StandardError)
           expect(error.to_s).to eq('Must provide API key or enterprise credentials when creationg client.')
         }
@@ -21,7 +21,7 @@ describe GoogleClient do
     context "given an API key that does not start with 'AIza'" do
       let (:client) { GoogleClient.new(key: 'dGhpcyBpcyBhIGtleQ==') }
       it 'raises a StandardError exception' do
-        expect { client.get(url: '/path/to/service', params: {}) }.to raise_error {|error|
+        expect { client.request(url: '/path/to/service', params: {}) }.to raise_error {|error|
           expect(error).to be_a(StandardError)
           expect(error.to_s).to eq('Invalid API key provided.')
         }
@@ -31,7 +31,7 @@ describe GoogleClient do
     context 'given a channel with no client ID' do
       let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', channel: 'azBze_Ejj34.') }
       it 'raises a StandardError exception' do
-        expect { client.get(url: '/path/to/service', params: {}) }.to raise_error {|error|
+        expect { client.request(url: '/path/to/service', params: {}) }.to raise_error {|error|
           expect(error).to be_a(StandardError)
           expect(error.to_s).to eq('The channel argument must be used with a client ID.')
         }
@@ -43,7 +43,7 @@ describe GoogleClient do
         GoogleClient.new(client_id: 'AIzadGhpcyBpc==', client_secret: 'yBhIGtleQ', channel: '+=er10)=')
       }
       it 'raises an error' do
-        expect { client.get(url: '/path/to/services', params: {}) }.to raise_error {|error|
+        expect { client.request(url: '/path/to/services', params: {}) }.to raise_error {|error|
           expect(error).to be_a(StandardError)
           expect(error.to_s).to eq('The channel argument must be an ASCII alphanumeric string. The period (.), underscore (_) and hyphen (-) characters are allowed.')
         }

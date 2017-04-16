@@ -10,7 +10,7 @@ describe Roads do
   let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
   let (:roads) { Roads.new(client) }
   before (:each) {
-    allow(client).to receive(:get).and_return({'snappedPoints' => [], 'speedLimits' => []})
+    allow(client).to receive(:request).and_return({'snappedPoints' => [], 'speedLimits' => []})
   }
 
   describe '#snap_to_roads' do

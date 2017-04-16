@@ -7,7 +7,7 @@ describe Geocode do
   let(:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
   let (:geocode) { Geocode.new(client) }
   before {
-    allow(client).to receive(:get).and_return({'results' => []})
+    allow(client).to receive(:request).and_return({'results' => []})
   }
 
   context 'given an address with filters and bounds' do
@@ -43,7 +43,7 @@ describe Geocode do
   context 'given a response format of value :xml' do
     before {
       xml = "<result></result>"
-      allow(client).to receive(:get).and_return(Nokogiri::XML(xml))
+      allow(client).to receive(:request).and_return(Nokogiri::XML(xml))
       client.response_format = :xml
     }
 
@@ -60,7 +60,7 @@ describe ReverseGeocode do
   let(:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
   let (:reverse_geocode) { ReverseGeocode.new(client) }
   before {
-    allow(client).to receive(:get).and_return({'results' => []})
+    allow(client).to receive(:request).and_return({'results' => []})
   }
 
   context 'given a lat/lng value' do
@@ -105,7 +105,7 @@ describe ReverseGeocode do
         <formatted_address>Walibi Belgium, Boulevard de l'Europe 100, 1300 Wavre, Belgium</formatted_address>
       </result>
       XML
-      allow(client).to receive(:get).and_return(Nokogiri::XML(xml))
+      allow(client).to receive(:request).and_return(Nokogiri::XML(xml))
       client.response_format = :xml
     }
 

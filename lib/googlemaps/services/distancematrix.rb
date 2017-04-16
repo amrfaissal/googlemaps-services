@@ -86,7 +86,7 @@ module GoogleMaps
           params['traffic_model'] = traffic_model
         end
 
-        self.client.get(url: "/maps/api/distancematrix/#{self.client.response_format}", params: params)
+        self.client.request(url: "/maps/api/distancematrix/#{self.client.response_format}", params: params)
       end
     end
   end

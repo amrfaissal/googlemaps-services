@@ -66,7 +66,7 @@ module GoogleMaps
           params['pitch'] = pitch
         end
 
-        self.client.get(url: "/maps/api/streetview", params: params)
+        self.client.request(url: "/maps/api/streetview", params: params)
       end
     end
   end

@@ -7,7 +7,7 @@ describe Timezone do
   let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
   let (:timezone) { Timezone.new(client) }
   before {
-    allow(client).to receive(:get).and_return({})
+    allow(client).to receive(:request).and_return({})
   }
 
   describe '#query' do

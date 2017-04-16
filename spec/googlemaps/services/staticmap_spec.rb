@@ -7,7 +7,7 @@ describe StaticMap do
   let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
   let (:staticmap) { StaticMap.new(client) }
   before {
-    allow(client).to receive(:get).and_return({
+    allow(client).to receive(:request).and_return({
           :url => "https://maps.googleapis.com/maps/api/staticmap?size=640x400&center=50.8449925%2C4.362961&zoom=16&maptype=hybrid",
           :mime_type => "image/png",
           :image_data => "iVBORw0KGgoAAAANSUhEUgAAAoAAAAGQCAMAAAAJLSEXAAADAFBMVEU..."})

@@ -130,7 +130,7 @@ module GoogleMaps
           params['pagetoken'] = page_token
         end
 
-        self.client.get(url: "/maps/api/place/#{url_part}search/#{self.client.response_format}", params: params)
+        self.client.request(url: "/maps/api/place/#{url_part}search/#{self.client.response_format}", params: params)
       end
 
       # Comprehensive details for an individual place.
@@ -145,7 +145,7 @@ module GoogleMaps
           params['language'] = language
         end
 
-        self.client.get(url: "/maps/api/place/details/#{self.client.response_format}", params: params)
+        self.client.request(url: "/maps/api/place/details/#{self.client.response_format}", params: params)
       end
 
       # Downloads a photo from the Places API.
@@ -168,7 +168,7 @@ module GoogleMaps
           params['maxheight'] = max_height
         end
 
-        self.client.get(url: '/maps/api/place/photo', params: params)
+        self.client.request(url: '/maps/api/place/photo', params: params)
       end
 
       # Returns Place predictions given a textual search string and optional geographic bounds.
@@ -233,9 +233,9 @@ module GoogleMaps
 
         case self.client.response_format
         when :xml
-          self.client.get(url: "/maps/api/place/#{url_part}autocomplete/xml", params: params).xpath('//prediction')
+          self.client.request(url: "/maps/api/place/#{url_part}autocomplete/xml", params: params).xpath('//prediction')
         when :json
-          self.client.get(url: "/maps/api/place/#{url_part}autocomplete/json", params: params)['predictions']
+          self.client.request(url: "/maps/api/place/#{url_part}autocomplete/json", params: params)['predictions']
         else
           raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end

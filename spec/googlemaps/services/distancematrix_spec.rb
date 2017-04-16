@@ -11,7 +11,7 @@ describe DistanceMatrix do
   let(:destinations) { ["Ghent"] }
 
   before {
-    allow(client).to receive(:get).and_return({
+    allow(client).to receive(:request).and_return({
       "destination_addresses"=>["Ghent, Belgium"],
       "origin_addresses"=>["Brussels, Belgium", "Bruges, Belgium"],
       "rows"=>[{"elements"=>[{"distance"=>{"text"=>"57.2 km", "value"=>57215},

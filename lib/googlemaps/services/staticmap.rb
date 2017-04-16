@@ -90,7 +90,7 @@ module GoogleMaps
           params['style'] = style
         end
 
-        self.client.get(url: "/maps/api/staticmap", params: params)
+        self.client.request(url: "/maps/api/staticmap", params: params)
       end
 
     end
