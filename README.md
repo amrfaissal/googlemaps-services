@@ -19,6 +19,7 @@ The Ruby Client for Google Maps Services is a Ruby Client library for the follow
  - [Places API]
  - [Static Maps API]
  - [Street View Image API]
+ - [Geolocation API]
 
 It supports both JSON and XML response formats.
 
@@ -65,10 +66,12 @@ This example uses the [Directions API] with an API key:
   client = GoogleClient.new(key: 'Add API key here', response_format: :json)
   directions = Directions.new(client)
 
-  # Get directions via public transit in JSON format
-  # To return the result in XML format, change the Client response_format parameter to :xml
-  result = directions.query(origin: '75 9th Ave, New York, NY', destination: 'MetLife Stadium Dr East Rutherford, NJ 07073',
-                            mode: 'transit', departure_time: Time.now)
+  # Get directions via public transit in JSON format.
+  # To return the result in XML format, change the Client response_format parameter to :xml.
+  result = directions.query(origin: '75 9th Ave, New York, NY',
+                            destination: 'MetLife Stadium Dr East Rutherford, NJ 07073',
+                            mode: 'transit',
+                            departure_time: Time.now)
   # Print the result
   puts result
 ```
@@ -78,6 +81,13 @@ For more usage examples, check out the [reference documentation](http://www.ruby
 ## Contributing
 
 Bug reports, Pull requests and Stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/amrfaissal/googlemaps-services/issues/new).
+
+### Donate
+
+* [![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.me/amrfaissal)
+* Bitcoin: 1EdwqtXhojU4LGhTwBLT1JpTb1d71oA89o
+
+![](https://cloud.githubusercontent.com/assets/1248967/25093965/2ea18cde-2395-11e7-8368-3f761b0bd8b7.png)
 
 ## License
 
@@ -92,3 +102,4 @@ The gem is available as open source under the terms of the [MIT License](http://
 [Places API]: https://developers.google.com/places/
 [Static Maps API]: https://developers.google.com/maps/documentation/static-maps/
 [Street View Image API]: https://developers.google.com/maps/documentation/streetview/
+[Geolocation API]: https://developers.google.com/maps/documentation/geolocation
