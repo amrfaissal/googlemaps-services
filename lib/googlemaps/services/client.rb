@@ -45,8 +45,8 @@ module GoogleMaps
       # @return [Symbol] Response format. Either :json or :xml
       attr_accessor :response_format
 
-      def initialize(key: nil, client_id: nil, client_secret: nil, write_timeout: 1,
-                     connect_timeout: 1, read_timeout: 1,retry_timeout: 60, request_headers: {},
+      def initialize(key: nil, client_id: nil, client_secret: nil, write_timeout: 2,
+                     connect_timeout: 5, read_timeout: 10, retry_timeout: 60, request_headers: {},
                      queries_per_second: 10, channel: nil, response_format: :json)
         unless key || (client_secret && client_id)
           raise StandardError, 'Must provide API key or enterprise credentials when creationg client.'
@@ -58,7 +58,6 @@ module GoogleMaps
 
         if channel
           raise StandardError, 'The channel argument must be used with a client ID.' unless client_id
-
 
           unless /^[a-zA-Z0-9._-]*$/.match(channel)
             raise StandardError, 'The channel argument must be an ASCII alphanumeric string. The period (.), underscore (_) and hyphen (-) characters are allowed.'
