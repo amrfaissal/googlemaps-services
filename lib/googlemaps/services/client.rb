@@ -49,7 +49,7 @@ module GoogleMaps
                      connect_timeout: 5, read_timeout: 10, retry_timeout: 60, request_headers: {},
                      queries_per_second: 10, channel: nil, response_format: :json)
         unless key || (client_secret && client_id)
-          raise StandardError, 'Must provide API key or enterprise credentials when creationg client.'
+          raise StandardError, 'Must provide API key or enterprise credentials when creating client.'
         end
 
         if key && !key.start_with?('AIza')
