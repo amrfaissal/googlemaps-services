@@ -13,7 +13,7 @@ describe GoogleClient do
       it 'raises a StandardError exception' do
         expect { client.request(url: '/path/to/service', params: {}) }.to raise_error {|error|
           expect(error).to be_a(StandardError)
-          expect(error.to_s).to eq('Must provide API key or enterprise credentials when creationg client.')
+          expect(error.to_s).to eq('Must provide API key or enterprise credentials when creating client.')
         }
       end
     end
