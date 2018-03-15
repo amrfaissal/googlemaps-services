@@ -49,6 +49,22 @@ describe GoogleClient do
         }
       end
     end
+
+    context 'given a response reporting OVER_QUERY_LIMIT' do
+      let(:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
+      let(:resp) { double(:resp, code: '200') }
+      let(:req) { double(:req, get: resp) }
+
+      before do
+        allow(resp).to receive_message_chain('content_type.mime_type').and_return('application/json')
+        allow(HTTP).to receive_message_chain('headers.timeout').and_return(req)
+        expect(client).to receive(:get_json_body).and_raise(RetriableRequest)
+      end
+
+      it 'does not blow up' do
+        expect { client.request(url: '/path/to/services', params: {}) }.not_to raise_error
+      end
+    end
   end
 
   describe '#get_redirection_url' do
