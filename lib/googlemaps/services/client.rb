@@ -99,7 +99,7 @@ module GoogleMaps
       # @param [Hash] post_json The request body which will be formatted as JSON.
       #
       # @return [Hash, Array, nil] response body (either in JSON or XML) or nil.
-      def request(url:, params:, first_request_time: nil, retry_counter: nil, base_url: Constants::DEFAULT_BASE_URL,
+      def request(url:, params:, first_request_time: nil, retry_counter: 0, base_url: Constants::DEFAULT_BASE_URL,
               accepts_clientid: true, extract_body: nil, request_headers: nil, post_json: nil)
         first_request_time = Util.current_time unless first_request_time
 
