@@ -47,7 +47,7 @@ end
 
 describe Util do
 
-  now = Time.parse('1969-07-20 20:17:40')
+  now = Time.parse('1969-07-20 20:17:40Z')
   before {
     allow(Time).to receive(:now) { now }
   }
@@ -60,7 +60,7 @@ describe Util do
 
   describe '.current_unix_time' do
     it 'returns current time in unix format' do
-      expect(Util.current_unix_time).to eql(-14186540)
+      expect(Util.current_unix_time).to eql(-14182940)
     end
   end
 
