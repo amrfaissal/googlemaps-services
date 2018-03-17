@@ -9,9 +9,9 @@ include GoogleMaps::Services::Exceptions
 describe GoogleClient do
   describe '#request' do
     context 'given no API key' do
-      let (:client) { GoogleClient.new }
+      let (:client) {GoogleClient.new}
       it 'raises a StandardError exception' do
-        expect { client.request(url: '/path/to/service', params: {}) }.to raise_error {|error|
+        expect {client.request(url: '/path/to/services', params: {})}.to raise_error {|error|
           expect(error).to be_a(StandardError)
           expect(error.to_s).to eq('Must provide API key or enterprise credentials when creating client.')
         }
@@ -19,9 +19,9 @@ describe GoogleClient do
     end
 
     context "given an API key that does not start with 'AIza'" do
-      let (:client) { GoogleClient.new(key: 'dGhpcyBpcyBhIGtleQ==') }
+      let (:client) {GoogleClient.new(key: 'dGhpcyBpcyBhIGtleQ==')}
       it 'raises a StandardError exception' do
-        expect { client.request(url: '/path/to/service', params: {}) }.to raise_error {|error|
+        expect {client.request(url: '/path/to/services', params: {})}.to raise_error {|error|
           expect(error).to be_a(StandardError)
           expect(error.to_s).to eq('Invalid API key provided.')
         }
@@ -29,9 +29,9 @@ describe GoogleClient do
     end
 
     context 'given a channel with no client ID' do
-      let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', channel: 'azBze_Ejj34.') }
+      let (:client) {GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', channel: 'azBze_Ejj34.')}
       it 'raises a StandardError exception' do
-        expect { client.request(url: '/path/to/service', params: {}) }.to raise_error {|error|
+        expect {client.request(url: '/path/to/services', params: {})}.to raise_error {|error|
           expect(error).to be_a(StandardError)
           expect(error.to_s).to eq('The channel argument must be used with a client ID.')
         }
@@ -43,32 +43,34 @@ describe GoogleClient do
         GoogleClient.new(client_id: 'AIzadGhpcyBpc==', client_secret: 'yBhIGtleQ', channel: '+=er10)=')
       }
       it 'raises an error' do
-        expect { client.request(url: '/path/to/services', params: {}) }.to raise_error {|error|
+        expect {client.request(url: '/path/to/services', params: {})}.to raise_error {|error|
           expect(error).to be_a(StandardError)
           expect(error.to_s).to eq('The channel argument must be an ASCII alphanumeric string. The period (.), underscore (_) and hyphen (-) characters are allowed.')
         }
       end
     end
 
-    context 'given a response reporting OVER_QUERY_LIMIT' do
-      let(:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
-      let(:resp) { double(:resp, code: '200') }
-      let(:req) { double(:req, get: resp) }
+    context 'given a retry_timeout less then elapsed request time' do
+      let(:client) {GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', retry_timeout: -1)}
+      let(:resp) {double(:resp, code: '200', body: "{}")}
+      let(:req) {double(:req, get: resp)}
 
       before do
         allow(resp).to receive_message_chain('content_type.mime_type').and_return('application/json')
         allow(HTTP).to receive_message_chain('headers.timeout').and_return(req)
-        expect(client).to receive(:get_json_body).and_raise(RetriableRequest)
       end
 
-      it 'does not blow up' do
-        expect { client.request(url: '/path/to/services', params: {}) }.not_to raise_error
+      it 'raises a Timeout error' do
+        expect {client.request(url: '/path/to/services', params: {})}.to raise_error {|error|
+          expect(error).to be_a(GoogleMaps::Services::Exceptions::Timeout)
+          expect(error.to_s).to eq("The request timed out.")
+        }
       end
     end
   end
 
   describe '#get_redirection_url' do
-    let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
+    let (:client) {GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==')}
 
     context 'given a response with status code different than 3XX' do
       let (:resp) {
@@ -96,7 +98,7 @@ describe GoogleClient do
   end
 
   describe '#get_map_image' do
-    let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
+    let (:client) {GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==')}
 
     context 'given a response with status code different than 200' do
       let (:resp) {
@@ -106,7 +108,7 @@ describe GoogleClient do
       }
 
       it 'raises an HTTPError' do
-        expect { client.send(:get_map_image, resp) }.to raise_error(HTTPError) { |error|
+        expect {client.send(:get_map_image, resp)}.to raise_error(HTTPError) {|error|
           expect(error.to_s).to eq("HTTP Error: #{resp.code}")
         }
       end
@@ -115,10 +117,10 @@ describe GoogleClient do
     context 'given a valid response status code' do
       let (:resp) {
         hash = {
-          'code' => '200',
-          'content_type' => {:mime_type => 'text/html', :charset=>'UTF-8'}.extend(HashDot),
-          'body' => "<html><body><div>Hello World!</div></body></html>",
-          'uri' => HTTP::URI.parse("https://google.be/")
+            'code' => '200',
+            'content_type' => {:mime_type => 'text/html', :charset => 'UTF-8'}.extend(HashDot),
+            'body' => "<html><body><div>Hello World!</div></body></html>",
+            'uri' => HTTP::URI.parse("https://google.be/")
         }
         hash.extend(HashDot)
         hash
@@ -126,16 +128,16 @@ describe GoogleClient do
 
       it 'returns a hash with media information (URL, MIME type and Base64-encoded value)' do
         expect(client.send(:get_map_image, resp)).to eql({
-          :url => 'https://google.be/',
-          :mime_type => 'text/html',
-          :image_data => 'PGh0bWw+PGJvZHk+PGRpdj5IZWxsbyBXb3JsZCE8L2Rpdj48L2JvZHk+PC9odG1sPg=='
-        })
+                                                             :url => 'https://google.be/',
+                                                             :mime_type => 'text/html',
+                                                             :image_data => 'PGh0bWw+PGJvZHk+PGRpdj5IZWxsbyBXb3JsZCE8L2Rpdj48L2JvZHk+PC9odG1sPg=='
+                                                         })
       end
     end
   end
 
   describe '#get_json_body' do
-    let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
+    let (:client) {GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==')}
 
     context 'given a response with status code different than 200' do
       let (:resp) {
@@ -144,7 +146,7 @@ describe GoogleClient do
         hash
       }
       it 'raises an HTTPError' do
-        expect { client.send(:get_json_body, resp) }.to raise_error(HTTPError)
+        expect {client.send(:get_json_body, resp)}.to raise_error(HTTPError)
       end
     end
 
@@ -155,7 +157,7 @@ describe GoogleClient do
         hash
       }
       it 'raises an APIError' do
-        expect { client.send(:get_json_body, resp) }.to raise_error(APIError)
+        expect {client.send(:get_json_body, resp)}.to raise_error(APIError)
       end
     end
 
@@ -180,7 +182,7 @@ describe GoogleClient do
         hash
       }
       it 'raises a RetriableRequest exception' do
-        expect { client.send(:get_json_body, resp)}.to raise_error(RetriableRequest)
+        expect {client.send(:get_json_body, resp)}.to raise_error(RetriableRequest)
       end
     end
 
@@ -191,13 +193,13 @@ describe GoogleClient do
         hash
       }
       it 'raises an APIError exception' do
-        expect { client.send(:get_json_body, resp) }.to raise_error(APIError, "something went wrong")
+        expect {client.send(:get_json_body, resp)}.to raise_error(APIError, "something went wrong")
       end
     end
   end
 
   describe '#get_xml_body' do
-    let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', response_format: :xml) }
+    let (:client) {GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', response_format: :xml)}
 
     context 'given a response with status code different than 200' do
       let (:resp) {
@@ -207,7 +209,7 @@ describe GoogleClient do
       }
 
       it 'raises an HTTPError' do
-        expect { client.send(:get_xml_body, resp) }.to raise_error(HTTPError)
+        expect {client.send(:get_xml_body, resp)}.to raise_error(HTTPError)
       end
     end
 
@@ -218,7 +220,7 @@ describe GoogleClient do
         hash
       }
       it 'raises an APIError' do
-        expect { client.send(:get_xml_body, resp) }.to raise_error(APIError)
+        expect {client.send(:get_xml_body, resp)}.to raise_error(APIError)
       end
     end
 
@@ -242,7 +244,7 @@ describe GoogleClient do
         hash
       }
       it 'raises a RetriableRequest exception' do
-        expect { client.send(:get_xml_body, resp)}.to raise_error(RetriableRequest)
+        expect {client.send(:get_xml_body, resp)}.to raise_error(RetriableRequest)
       end
     end
 
@@ -253,7 +255,7 @@ describe GoogleClient do
         hash
       }
       it 'raises an APIError exception' do
-        expect { client.send(:get_xml_body, resp) }.to raise_error(APIError, "something went wrong")
+        expect {client.send(:get_xml_body, resp)}.to raise_error(APIError, "something went wrong")
       end
     end
   end
@@ -261,28 +263,28 @@ describe GoogleClient do
   describe '#generate_auth_url' do
     context 'given both client_id and client_secret' do
       let (:client) {
-        GoogleClient.new(client_id: "104-rdqt7.apps.googleusercontent.com", client_secret: "UOjXRXBibmBCwTNQ2RZKCxn3", channel:"chan-y87z")
+        GoogleClient.new(client_id: "104-rdqt7.apps.googleusercontent.com", client_secret: "UOjXRXBibmBCwTNQ2RZKCxn3", channel: "chan-y87z")
       }
       it 'returns an auth URL with encoded signature and parameters' do
         expect(
-          client.send(:generate_auth_url, '/path/to/service', true)
+            client.send(:generate_auth_url, '/path/to/service', true)
         ).to eql("/path/to/service?channel=chan-y87z&client=104-rdqt7.apps.googleusercontent.com&signature=IsxUgkXqYS7c2nqYHwUONboD7VA=")
       end
     end
 
     context 'given a path with parameters' do
-      let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
+      let (:client) {GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==')}
       it 'returns an auth URL with encoded key and parameters' do
         expect(
-          client.send(:generate_auth_url, '/path/to/service', {'param1' => 'value'}, false)
+            client.send(:generate_auth_url, '/path/to/service', {'param1' => 'value'}, false)
         ).to eql('/path/to/service?param1=value&key=AIzadGhpcyBpcyBhIGtleQ%3D%3D')
       end
     end
 
     context 'given no API key' do
-      let (:client) { GoogleClient.new(key: nil) }
+      let (:client) {GoogleClient.new(key: nil)}
       it 'raises an error' do
-        expect { client.send(:generate_auth_url, '/path/to/service', false) }.to raise_error(StandardError)
+        expect {client.send(:generate_auth_url, '/path/to/service', false)}.to raise_error(StandardError)
       end
     end
   end
