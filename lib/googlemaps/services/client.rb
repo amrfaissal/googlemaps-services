@@ -135,7 +135,8 @@ module GoogleMaps
 
         if Constants::RETRIABLE_STATUSES.include? resp.code.to_i
           # Retry request
-          self.request(url, params, first_request_time, retry_counter + 1, base_url, accepts_clientid, extract_body, post_json)
+          self.request(url: url, params: params, first_request_time: first_request_time, retry_counter: retry_counter + 1, base_url: base_url,
+            accepts_clientid: accepts_clientid, extract_body: extract_body, request_headers: request_headers, post_json: post_json)
         end
 
         # Check if the time of the nth previous query (where n is queries_per_second)
@@ -167,7 +168,8 @@ module GoogleMaps
           return result
         rescue RetriableRequest
           # Retry request
-          return self.request(url, params, first_request_time, retry_counter + 1, base_url, accepts_clientid, extract_body, post_json)
+          self.request(url: url, params: params, first_request_time: first_request_time, retry_counter: retry_counter + 1, base_url: base_url,
+            accepts_clientid: accepts_clientid, extract_body: extract_body, request_headers: request_headers, post_json: post_json)
         end
       end
 
