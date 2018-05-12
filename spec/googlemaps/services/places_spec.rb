@@ -4,8 +4,8 @@ require 'googlemaps/services/client'
 include GoogleMaps::Services
 
 describe Places do
-  let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
-  let (:places) { Places.new(client) }
+  let (:client) {GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==')}
+  let (:places) {Places.new(client)}
   before {
     allow(client).to receive(:request).and_return({})
   }
@@ -13,20 +13,26 @@ describe Places do
   describe '#search' do
     it 'returns search results' do
       expect(
-        places.search(query: 'Some place',
-                     location: "50.8449925,4.362961",
-                     radius: 12.3,
-                     language: "en",
-                     min_price: 12,
-                     max_price: 40,
-                     open_now: true,
-                     type: "cafe",
-                     page_token: "20")
+          places.search(query: 'Some place',
+                        location: "50.8449925,4.362961",
+                        radius: 12.3,
+                        language: "en",
+                        min_price: 12,
+                        max_price: 40,
+                        open_now: true,
+                        type: "cafe",
+                        page_token: "20")
       ).to eq({})
     end
   end
 
   describe '#nearby' do
+    context 'given no location nor page_token' do
+      it 'raises an error' do
+        expect {places.nearby}.to raise_error(StandardError)
+      end
+    end
+
     context 'given rank by distance' do
       it 'raises a StandardError if keyword, name and type are nil' do
         expect {
@@ -34,12 +40,12 @@ describe Places do
         }.to raise_error(StandardError)
       end
 
-      it 'raises s StandardError if radius is not nil' do
+      it 'raises a StandardError if radius is not nil' do
         expect {
           places.nearby(location: {:lat => 50.8503, :lng => 4.3517},
-            rank_by: "distance",
-            type: "cafe",
-            radius: 500)
+                        rank_by: "distance",
+                        type: "cafe",
+                        radius: 500)
         }.to raise_error(StandardError)
       end
     end
@@ -47,16 +53,16 @@ describe Places do
     context 'given a certain location' do
       it 'returns nearby search results' do
         expect(
-          places.nearby(location: {:lat => 50.8503, :lng => 4.3517},
-            radius: 500,
-            keyword: "cafe_late",
-            type: "cafe",
-            page_token: "20",
-            open_now: true,
-            language: "en",
-            rank_by: "type",
-            min_price: 2,
-            max_price: 6.5)
+            places.nearby(location: {:lat => 50.8503, :lng => 4.3517},
+                          radius: 500,
+                          keyword: "cafe_late",
+                          type: "cafe",
+                          page_token: "20",
+                          open_now: true,
+                          language: "en",
+                          rank_by: "type",
+                          min_price: 2,
+                          max_price: 6.5)
         ).to eq({})
       end
     end
@@ -110,9 +116,9 @@ describe Places do
         client.response_format = :weird
         expect {
           places.autocomplete(input_text: 'Brussels',
-            offset: 6,
-            location: "50.9472095,4.0028986",
-            radius: 50)
+                              offset: 6,
+                              location: "50.9472095,4.0028986",
+                              radius: 50)
         }.to raise_error(StandardError)
       end
     end
@@ -124,13 +130,13 @@ describe Places do
       it 'returns an array of predictions' do
         client.response_format = :json
         expect(
-          places.autocomplete(input_text: 'Brussels',
-            offset: 6,
-            location: "50.9472095,4.0028986",
-            radius: 50,
-            language: "en",
-            type: "locality",
-            components: {'country' => 'BE', 'postal_code' => 1000})
+            places.autocomplete(input_text: 'Brussels',
+                                offset: 6,
+                                location: "50.9472095,4.0028986",
+                                radius: 50,
+                                language: "en",
+                                type: "locality",
+                                components: {'country' => 'BE', 'postal_code' => 1000})
         ).to eq([])
       end
     end
@@ -169,12 +175,12 @@ describe Places do
       it 'returns an XML NodeSet of predictions' do
         client.response_format = :xml
         expected_val = places.autocomplete(input_text: 'Brussels',
-          offset: 6,
-          location: "50.9472095,4.0028986",
-          radius: 50,
-          language: "en",
-          type: "locality",
-          components: {'country' => 'BE', 'postal_code' => 1000})
+                                           offset: 6,
+                                           location: "50.9472095,4.0028986",
+                                           radius: 50,
+                                           language: "en",
+                                           type: "locality",
+                                           components: {'country' => 'BE', 'postal_code' => 1000})
 
         expect(expected_val.is_a? Nokogiri::XML::NodeSet).to eq(true)
         expect(expected_val.empty?).to eq(false)
@@ -187,10 +193,10 @@ describe Places do
     it 'returns an array of place predictions given a search query' do
       allow(client).to receive(:request).and_return({'predictions' => []})
       expect(places.autocomplete_query(input_text: 'pizza near Brussels',
-          offset: 6,
-          location: "50.9472095,4.0028986",
-          radius: 50,
-          language: "en")).to eq([])
+                                       offset: 6,
+                                       location: "50.9472095,4.0028986",
+                                       radius: 50,
+                                       language: "en")).to eq([])
     end
   end
 end

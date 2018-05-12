@@ -47,8 +47,11 @@ module GoogleMaps
       # @param [String] page_token Token from a previous search that when provided will returns the next page of results for the same search.
       #
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
-      def nearby(location:, radius: nil, keyword: nil, language: nil, min_price: nil,
+      def nearby(location: nil, radius: nil, keyword: nil, language: nil, min_price: nil,
                  max_price: nil, name: nil, open_now: false, rank_by: nil, type: nil, page_token: nil)
+        if !location && !page_token
+          raise StandardError, 'either a location or page_token is required.'
+        end
         if rank_by == 'distance'
           if !(keyword || name || type)
             raise StandardError, 'either a keyword, name or type arg is required when rank_by is set to distance.'
@@ -75,7 +78,7 @@ module GoogleMaps
       #
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def radar(location:, radius:, keyword: nil, min_price: nil,
-                     max_price: nil, name: nil, open_now: false, type: nil)
+                max_price: nil, name: nil, open_now: false, type: nil)
         raise StandardError, 'either a keyword, name, or type arg is required.' unless (keyword || name || type)
 
         _places(url_part: 'radar', location: location, radius: radius,
@@ -88,7 +91,7 @@ module GoogleMaps
       def _places(url_part:, query: nil, location: nil, radius: nil, keyword: nil, language: nil,
                   min_price: 0, max_price: 4, name: nil, open_now: false, rank_by: nil, type: nil,
                   page_token: nil)
-        params = {'minprice' => min_price, 'maxprice' => max_price }
+        params = {'minprice' => min_price, 'maxprice' => max_price}
 
         if query
           params['query'] = query
@@ -140,7 +143,7 @@ module GoogleMaps
       #
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def place_details(place_id:, language: nil)
-        params = {'placeid' => place_id }
+        params = {'placeid' => place_id}
         if language
           params['language'] = language
         end
@@ -204,8 +207,8 @@ module GoogleMaps
       # Handler for "autocomplete" and "autocomplete_query" queries.
       # @private
       def _autocomplete(url_part:, input_text:, offset: nil, location: nil,
-                       radius: nil, language: nil, type: nil, components: nil)
-        params = {'input' => input_text }
+                        radius: nil, language: nil, type: nil, components: nil)
+        params = {'input' => input_text}
 
         if offset
           params['offset'] = offset
