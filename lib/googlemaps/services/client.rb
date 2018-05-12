@@ -75,7 +75,7 @@ module GoogleMaps
         self.client_secret = client_secret
         self.channel = channel
         self.retry_timeout = retry_timeout
-        self.request_headers = request_headers.merge({ 'User-Agent' => Constants::USER_AGENT })
+        self.request_headers = request_headers.merge({'User-Agent' => Constants::USER_AGENT})
         self.queries_per_second = queries_per_second
         self.sent_times = Array.new
 
@@ -100,7 +100,7 @@ module GoogleMaps
       #
       # @return [Hash, Array, nil] response body (either in JSON or XML) or nil.
       def request(url:, params:, first_request_time: nil, retry_counter: 0, base_url: Constants::DEFAULT_BASE_URL,
-              accepts_clientid: true, extract_body: nil, request_headers: nil, post_json: nil)
+                  accepts_clientid: true, extract_body: nil, request_headers: nil, post_json: nil)
         first_request_time = Util.current_time unless first_request_time
 
         elapsed = Time.now - first_request_time
@@ -128,7 +128,7 @@ module GoogleMaps
 
         # Create the request, add the headers & timeouts
         req = HTTP.headers(request_headers)
-                .timeout(:write => self.write_timeout, :connect => self.connect_timeout, :read => self.read_timeout)
+                  .timeout(:write => self.write_timeout, :connect => self.connect_timeout, :read => self.read_timeout)
 
         # Make the HTTP GET/POST request
         resp = post_json ? req.post(uri.to_s, :json => post_json) : req.get(uri.to_s)
@@ -136,7 +136,7 @@ module GoogleMaps
         if Constants::RETRIABLE_STATUSES.include? resp.code.to_i
           # Retry request
           self.request(url: url, params: params, first_request_time: first_request_time, retry_counter: retry_counter + 1, base_url: base_url,
-            accepts_clientid: accepts_clientid, extract_body: extract_body, request_headers: request_headers, post_json: post_json)
+                       accepts_clientid: accepts_clientid, extract_body: extract_body, request_headers: request_headers, post_json: post_json)
         end
 
         # Check if the time of the nth previous query (where n is queries_per_second)
@@ -169,7 +169,7 @@ module GoogleMaps
         rescue RetriableRequest
           # Retry request
           self.request(url: url, params: params, first_request_time: first_request_time, retry_counter: retry_counter + 1, base_url: base_url,
-            accepts_clientid: accepts_clientid, extract_body: extract_body, request_headers: request_headers, post_json: post_json)
+                       accepts_clientid: accepts_clientid, extract_body: extract_body, request_headers: request_headers, post_json: post_json)
         end
       end
 
@@ -236,7 +236,7 @@ module GoogleMaps
 
         # Parse the XML response body
         begin
-          doc = Nokogiri::XML(resp.body) { |config| config.strict }
+          doc = Nokogiri::XML(resp.body) {|config| config.strict}
         rescue
           raise APIError.new(status_code), 'Received a malformed XML response.'
         end
@@ -271,9 +271,9 @@ module GoogleMaps
         end
 
         {
-          :url => resp.uri.to_s,
-          :mime_type => resp.content_type.mime_type,
-          :image_data => Base64.encode64(resp.body).gsub(/\n/, '')
+            :url => resp.uri.to_s,
+            :mime_type => resp.content_type.mime_type,
+            :image_data => Base64.encode64(resp.body).gsub(/\n/, '')
         }
       end
 
@@ -286,7 +286,7 @@ module GoogleMaps
       # @param [TrueClass, FalseClass] accepts_clientid Flag whether to use a Client ID or not.
       #
       # @return [String] the final request path.
-      def generate_auth_url(path, params={}, accepts_clientid)
+      def generate_auth_url(path, params = {}, accepts_clientid)
         if accepts_clientid && self.client_id && self.client_secret
           if self.channel
             params['channel'] = self.channel

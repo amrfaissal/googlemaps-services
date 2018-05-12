@@ -22,14 +22,15 @@ module GoogleMaps
       # @param [Integer] max_price Restricts results to only those places with no greater than this price level. Valid values are in the range from 0 (most affordable) to 4 (most expensive).
       # @param [TrueClass, FalseClass] open_now Return only those places that are open for business at the time the query is sent.
       # @param [String] type Restricts the results to places matching the specified type. The full list of supported types is available here: https://developers.google.com/places/supported_types
+      # @param [String] region The region code, specified as a ccTLD (country code top-level domain) two-character value.
       # @param [String] page_token Token from a previous search that when provided will returns the next page of results for the same search.
       #
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def search(query:, location: nil, radius: nil, language: nil, min_price: nil,
-                 max_price: nil, open_now: false, type: nil, page_token: nil)
+                 max_price: nil, open_now: false, type: nil, region: nil, page_token: nil)
         _places(url_part: 'text', query: query, location: location, radius: radius,
                 language: language, min_price: min_price, max_price: max_price,
-                open_now: open_now, type: type, page_token: page_token)
+                open_now: open_now, type: type, region: region, page_token: page_token)
       end
 
       # Performs nearby search for places.
@@ -90,7 +91,7 @@ module GoogleMaps
       # @private
       def _places(url_part:, query: nil, location: nil, radius: nil, keyword: nil, language: nil,
                   min_price: 0, max_price: 4, name: nil, open_now: false, rank_by: nil, type: nil,
-                  page_token: nil)
+                  region: nil, page_token: nil)
         params = {'minprice' => min_price, 'maxprice' => max_price}
 
         if query
@@ -127,6 +128,10 @@ module GoogleMaps
 
         if type
           params['type'] = type
+        end
+
+        if region
+          params['region'] = region
         end
 
         if page_token

@@ -13,14 +13,14 @@ describe Places do
   describe '#search' do
     it 'returns search results' do
       expect(
-          places.search(query: 'Some place',
+          places.search(query: 'cafe',
                         location: "50.8449925,4.362961",
                         radius: 12.3,
                         language: "en",
                         min_price: 12,
                         max_price: 40,
                         open_now: true,
-                        type: "cafe",
+                        region: "BE",
                         page_token: "20")
       ).to eq({})
     end
