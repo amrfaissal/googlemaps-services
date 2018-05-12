@@ -80,6 +80,7 @@ module GoogleMaps
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
       def radar(location:, radius:, keyword: nil, min_price: nil,
                 max_price: nil, name: nil, open_now: false, type: nil)
+        warn '[DEPRECATION] Places Radar is deprecated as of June 30, 2018. After that time, this feature will no longer be available.'
         raise StandardError, 'either a keyword, name, or type arg is required.' unless (keyword || name || type)
 
         _places(url_part: 'radar', location: location, radius: radius,
