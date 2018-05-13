@@ -151,7 +151,7 @@ describe Places do
                                 radius: 50,
                                 language: "en",
                                 type: "locality",
-                                components: {'country' => 'BE', 'postal_code' => 1000})
+                                components: {'country' => 'BE'})
         ).to eq([])
       end
     end
@@ -195,7 +195,7 @@ describe Places do
                                            radius: 50,
                                            language: "en",
                                            type: "locality",
-                                           components: {'country' => 'BE', 'postal_code' => 1000})
+                                           components: {'country' => 'BE'})
 
         expect(expected_val.is_a? Nokogiri::XML::NodeSet).to eq(true)
         expect(expected_val.empty?).to eq(false)
