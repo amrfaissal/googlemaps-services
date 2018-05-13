@@ -38,7 +38,7 @@ module GoogleMaps
       attr_accessor :retry_timeout
       # @return [Symbol] HTTP headers per request.
       attr_accessor :request_headers
-      # @return [Symbol] number of queries per second permitted. If the rate limit is reached, the client will sleep for the appropriate amout of time before it runs the current query.
+      # @return [Symbol] number of queries per second permitted. If the rate limit is reached, the client will sleep for the appropriate amount of time before it runs the current query.
       attr_accessor :queries_per_second
       # @return [Symbol] keeps track of sent queries.
       attr_accessor :sent_times
@@ -47,7 +47,7 @@ module GoogleMaps
 
       def initialize(key: nil, client_id: nil, client_secret: nil, write_timeout: 2,
                      connect_timeout: 5, read_timeout: 10, retry_timeout: 60, request_headers: {},
-                     queries_per_second: 10, channel: nil, response_format: :json)
+                     queries_per_second: 50, channel: nil, response_format: :json)
         unless key || (client_secret && client_id)
           raise StandardError, 'Must provide API key or enterprise credentials when creating client.'
         end
