@@ -130,7 +130,7 @@ describe Places do
                               offset: 6,
                               location: '50.9472095,4.0028986',
                               radius: 50,
-                              components: {'administrative_area': 'TX', 'country': 'US'})
+                              components: {'administrative_area' => 'TX', 'country' => 'US'})
         }.to raise_error {|error|
           expect(error.is_a?(StandardError)).to be(true)
           expect(error.to_s).to eql('Only country components are supported.')
@@ -151,7 +151,7 @@ describe Places do
                                 radius: 50,
                                 language: "en",
                                 type: "locality",
-                                components: {'country' => 'BE', 'postal_code' => 1000})
+                                components: {'country' => 'BE'})
         ).to eq([])
       end
     end
@@ -195,7 +195,7 @@ describe Places do
                                            radius: 50,
                                            language: "en",
                                            type: "locality",
-                                           components: {'country' => 'BE', 'postal_code' => 1000})
+                                           components: {'country' => 'BE'})
 
         expect(expected_val.is_a? Nokogiri::XML::NodeSet).to eq(true)
         expect(expected_val.empty?).to eq(false)
