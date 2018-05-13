@@ -24,6 +24,8 @@ The Ruby Client for Google Maps Services is a Ruby Client library for the follow
 
 It supports both JSON and XML response formats.
 
+**Please make sure you are using the latest release to get the newest features.**
+
 ## Requirements
 
  - Ruby 2.1 or later.
