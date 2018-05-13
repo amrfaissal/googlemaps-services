@@ -188,7 +188,7 @@ module GoogleMaps
       # @param [Integer] radius Distance in meters within which to bias results.
       # @param [String] language The language in which to return results.
       # @param [String] type Restricts the results to places matching the specified type. The full list of supported types is available here: https://developers.google.com/places/web-service/autocomplete#place_types
-      # @param [Hash] components A component filter for which you wish to obtain a geocode, e.g. "{'administrative_area': 'TX','country': 'US'}"
+      # @param [Hash] components A grouping of places to which you would like to restrict your results. Currently, you can use components to filter by up to 5 countries for example: {'country': ['US', 'AU']}
       #
       # @return [Array, Nokogiri::XML::NodeSet] Array of predictions.
       def autocomplete(input_text:, offset: nil, location: nil, radius: nil, language: nil, type: nil, components: nil)
@@ -237,6 +237,9 @@ module GoogleMaps
         end
 
         if components
+          if components.size != 1 || components.keys[0] != 'country'
+            raise StandardError, 'Only country components are supported.'
+          end
           params['components'] = Convert.components(components)
         end
 

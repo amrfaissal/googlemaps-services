@@ -123,6 +123,21 @@ describe Places do
       end
     end
 
+    context 'given unsupported components filter' do
+      it 'raises an error' do
+        expect {
+          places.autocomplete(input_text: 'Brussels',
+                              offset: 6,
+                              location: '50.9472095,4.0028986',
+                              radius: 50,
+                              components: {'administrative_area': 'TX', 'country': 'US'})
+        }.to raise_error {|error|
+          expect(error.is_a?(StandardError)).to be(true)
+          expect(error.to_s).to eql('Only country components are supported.')
+        }
+      end
+    end
+
     context 'given a response format of value :json' do
       before {
         allow(client).to receive(:request).and_return({'predictions' => []})
