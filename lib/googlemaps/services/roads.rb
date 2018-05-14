@@ -28,14 +28,14 @@ module GoogleMaps
       #
       # @return [Array] Array of snapped points.
       def snap_to_roads(path:, interpolate: false)
-        params = {'path' => Convert.piped_location(path) }
+        params = {'path' => Convert.piped_location(path)}
 
         if interpolate
           params['interpolate'] = 'true'
         end
 
         self.client.request(url: '/v1/snapToRoads', params: params, base_url: Constants::ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
+                            accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
       end
 
       # Returns the posted speed limit (in km/h) for given road segments.
@@ -50,7 +50,7 @@ module GoogleMaps
         params = {'placeId' => place_ids}
 
         self.client.request(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['speedLimits']
+                            accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['speedLimits']
       end
 
       # Returns the posted speed limit (in km/h) for given road segments.
@@ -63,7 +63,7 @@ module GoogleMaps
         params = {'path' => Convert.piped_location(path)}
 
         self.client.request(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))
+                            accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))
       end
 
       # Find the closest road segments for each point.
@@ -77,7 +77,7 @@ module GoogleMaps
         params = {'points' => Convert.piped_location(points)}
 
         self.client.request(url: '/v1/nearestRoads', params: params, base_url: Constants::ROADS_BASE_URL,
-                        accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
+                            accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
       end
 
       # Extracts result from the Roads API HTTP response.
@@ -100,7 +100,7 @@ module GoogleMaps
           status = error['status']
 
           if status == 'RESOURCE_EXHAUSTED'
-            raise RetriableRequest
+            raise OverQueryLimit
           end
 
           if error.respond_to?(:key?) && error.key?('message')

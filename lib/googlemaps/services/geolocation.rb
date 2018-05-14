@@ -94,6 +94,12 @@ module GoogleMaps
         status_code = response.code.to_i
         begin
           body = JSON.parse(response.body)
+          if [200, 404].include? status_code
+            return body
+          end
+          if status_code == 403
+            raise OverQueryLimit
+          end
         rescue JSON::ParserError
           raise APIError.new(status_code), 'Received malformed response.'
         end
@@ -101,11 +107,7 @@ module GoogleMaps
         if body.key?('error')
           raise APIError.new(status_code), body['error']['errors'][0]['reason']
         end
-
-        if status_code != 200
-          raise HTTPError.new(status_code)
-        end
-        body
+        raise HTTPError.new(status_code)
       end
 
       private :_geolocation_extract

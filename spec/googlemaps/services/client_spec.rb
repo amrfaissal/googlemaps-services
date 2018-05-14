@@ -67,6 +67,23 @@ describe GoogleClient do
         }
       end
     end
+
+    context 'given request exceeded query rate limit and retry_over_query_limit set to false' do
+      let(:client) {GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==', retry_over_query_limit: false)}
+      let(:resp) {double(:resp, code: '200', body: '{"status": "OVER_QUERY_LIMIT"}')}
+      let(:req) {double(:req, get: resp)}
+
+      before do
+        allow(resp).to receive_message_chain('content_type.mime_type').and_return('application/json')
+        allow(HTTP).to receive_message_chain('headers.timeout').and_return(req)
+      end
+
+      it 'raises OverQueryLimit exception' do
+        expect {client.request(url: '/path/to/services', params: {})}.to raise_error {|error|
+          expect(error).to be_a(GoogleMaps::Services::Exceptions::OverQueryLimit)
+        }
+      end
+    end
   end
 
   describe '#get_redirection_url' do

@@ -38,16 +38,18 @@ module GoogleMaps
       attr_accessor :retry_timeout
       # @return [Symbol] HTTP headers per request.
       attr_accessor :request_headers
-      # @return [Symbol] number of queries per second permitted. If the rate limit is reached, the client will sleep for the appropriate amount of time before it runs the current query.
+      # @return [Symbol] Number of queries per second permitted. If the rate limit is reached, the client will sleep for the appropriate amount of time before it runs the current query.
       attr_accessor :queries_per_second
       # @return [Symbol] keeps track of sent queries.
       attr_accessor :sent_times
+      # @return [Symbol] Should retry request when exceeds the query rate limit.
+      attr_accessor :retry_over_query_limit
       # @return [Symbol] Response format. Either :json or :xml
       attr_accessor :response_format
 
       def initialize(key: nil, client_id: nil, client_secret: nil, write_timeout: 2,
                      connect_timeout: 5, read_timeout: 10, retry_timeout: 60, request_headers: {},
-                     queries_per_second: 50, channel: nil, response_format: :json)
+                     queries_per_second: 50, channel: nil, retry_over_query_limit: true, response_format: :json)
         unless key || (client_secret && client_id)
           raise StandardError, 'Must provide API key or enterprise credentials when creating client.'
         end
@@ -78,6 +80,7 @@ module GoogleMaps
         self.request_headers = request_headers.merge({'User-Agent' => Constants::USER_AGENT})
         self.queries_per_second = queries_per_second
         self.sent_times = Array.new
+        self.retry_over_query_limit = retry_over_query_limit
 
         if response_format
           raise StandardError, 'Unsupported response format. Should be either :json or :xml.' unless [:json, :xml].include? response_format
@@ -135,8 +138,9 @@ module GoogleMaps
 
         if Constants::RETRIABLE_STATUSES.include? resp.code.to_i
           # Retry request
-          self.request(url: url, params: params, first_request_time: first_request_time, retry_counter: retry_counter + 1, base_url: base_url,
-                       accepts_clientid: accepts_clientid, extract_body: extract_body, request_headers: request_headers, post_json: post_json)
+          self.request(url: url, params: params, first_request_time: first_request_time, retry_counter: retry_counter + 1,
+                       base_url: base_url, accepts_clientid: accepts_clientid, extract_body: extract_body,
+                       request_headers: request_headers, post_json: post_json)
         end
 
         # Check if the time of the nth previous query (where n is queries_per_second)
@@ -166,10 +170,14 @@ module GoogleMaps
           end
           self.sent_times.push(Util.current_time)
           return result
-        rescue RetriableRequest
+        rescue RetriableRequest => e
+          if e.is_a?(OverQueryLimit) && !self.retry_over_query_limit
+            raise
+          end
           # Retry request
-          self.request(url: url, params: params, first_request_time: first_request_time, retry_counter: retry_counter + 1, base_url: base_url,
-                       accepts_clientid: accepts_clientid, extract_body: extract_body, request_headers: request_headers, post_json: post_json)
+          self.request(url: url, params: params, first_request_time: first_request_time, retry_counter: retry_counter + 1,
+                       base_url: base_url, accepts_clientid: accepts_clientid, extract_body: extract_body,
+                       request_headers: request_headers, post_json: post_json)
         end
       end
 
@@ -212,7 +220,7 @@ module GoogleMaps
         end
 
         if api_status == 'OVER_QUERY_LIMIT'
-          raise RetriableRequest
+          raise OverQueryLimit
         end
 
         if body.key?('error_message')
@@ -247,7 +255,7 @@ module GoogleMaps
         end
 
         if api_status == 'OVER_QUERY_LIMIT'
-          raise RetriableRequest
+          raise OverQueryLimit
         end
 
         error_message = doc.xpath('//error_message')

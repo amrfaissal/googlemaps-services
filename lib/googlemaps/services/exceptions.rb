@@ -50,6 +50,12 @@ module GoogleMaps
       class RetriableRequest < Exception
       end
 
+      # Signifies that the request failed because the client exceeded its query rate limit.
+      # Normally we treat this as a retriable condition, but we allow the calling code to specify
+      # that these requests should not be retried.
+      class OverQueryLimit < RetriableRequest
+      end
+
     end
   end
 end
