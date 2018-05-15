@@ -5,19 +5,37 @@ require 'googlemaps/services/distancematrix'
 include GoogleMaps::Services
 
 describe DistanceMatrix do
-  let (:client) { GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==') }
-  let (:distancematrix) { DistanceMatrix.new(client) }
-  let (:origins) { ["Brussels", "Bruges"] }
-  let(:destinations) { ["Ghent"] }
+  let (:client) {GoogleClient.new(key: 'AIzadGhpcyBpcyBhIGtleQ==')}
+  let (:distancematrix) {DistanceMatrix.new(client)}
+  let (:origins) {%w(Brussels Bruges)}
+  let(:destinations) {%w(Ghent)}
 
   before {
     allow(client).to receive(:request).and_return({
-      "destination_addresses"=>["Ghent, Belgium"],
-      "origin_addresses"=>["Brussels, Belgium", "Bruges, Belgium"],
-      "rows"=>[{"elements"=>[{"distance"=>{"text"=>"57.2 km", "value"=>57215},
-                "duration"=>{"text"=>"54 mins", "value"=>3247}, "status"=>"OK"}]},
-              {"elements"=>[{"distance"=>{"text"=>"49.1 km", "value"=>49129},
-               "duration"=>{"text"=>"47 mins", "value"=>2801}, "status"=>"OK"}]}], "status"=>"OK"})
+                                                      'destination_addresses' => ["Ghent, Belgium"],
+                                                      'origin_addresses' => ["Brussels, Belgium", "Bruges, Belgium"],
+                                                      'rows' => [
+                                                          {
+                                                              'elements' => [
+                                                                  {
+                                                                      'distance' => {'text' => "57.2 km", 'value' => 57215},
+                                                                      'duration' => {'text' => "54 mins", 'value' => 3247},
+                                                                      'status' => "OK"
+                                                                  }
+                                                              ]
+                                                          },
+                                                          {
+                                                              'elements' => [
+                                                                  {
+                                                                      'distance' => {'text' => "49.1 km", 'value' => 49129},
+                                                                      'duration' => {'text' => "47 mins", 'value' => 2801},
+                                                                      'status' => "OK"
+                                                                  }
+                                                              ]
+                                                          }
+                                                      ],
+                                                      'status' => "OK"
+                                                  })
   }
 
   describe '#query' do
@@ -41,9 +59,9 @@ describe DistanceMatrix do
       it 'raises a StandardError exception' do
         expect {
           distancematrix.query(origins: origins,
-            destinations: destinations,
-            departure_time: Util.current_unix_time,
-            arrival_time: Util.current_unix_time + 100)
+                               destinations: destinations,
+                               departure_time: Util.current_unix_time,
+                               arrival_time: Util.current_unix_time + 100)
         }.to raise_error(StandardError)
       end
     end
@@ -51,15 +69,16 @@ describe DistanceMatrix do
     context 'given origins and destinations from which to calculate distance and time' do
       it 'returns a matrix of distances' do
         distance_matrix = distancematrix.query(origins: origins,
-          destinations: destinations,
-          mode: "driving",
-          language: "en",
-          avoid: "tolls",
-          units: "metric",
-          departure_time: Util.current_unix_time,
-          transit_mode: "bus",
-          transit_routing_preference: "fewer_transfers",
-          traffic_model: "optimistic")
+                                               destinations: destinations,
+                                               mode: "driving",
+                                               language: "en",
+                                               avoid: "tolls",
+                                               units: "metric",
+                                               departure_time: Util.current_unix_time,
+                                               transit_mode: "bus",
+                                               transit_routing_preference: "fewer_transfers",
+                                               traffic_model: "optimistic",
+                                               region: "BE")
 
         expect(distance_matrix.instance_of? Hash).to eq(true)
         expect(distance_matrix.empty?).to eq(false)

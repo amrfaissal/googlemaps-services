@@ -34,11 +34,11 @@ module GoogleMaps
       # @param [String] transit_routing_preference Specifies preferences for transit requests. Valid values are "less_walking" or "fewer_transfers".
       # @param [String] traffic_model Specifies the predictive travel time model to use. Valid values are "best_guess" or "optimistic" or "pessimistic".
       #                               The traffic_model parameter may only be specified for requests where the travel mode is driving, and where the request includes a departure_time.
+      # @param [String] region The region code, specified as a ccTLD (country code top-level domain) two-character value.
       #
       # @return [Hash, Nokogiri::XML::Document] Matrix of distances.
-      def query(origins:, destinations:, mode: nil, language: nil, avoid: nil,
-                units: nil, departure_time: nil, arrival_time: nil, transit_mode: nil,
-                transit_routing_preference: nil, traffic_model: nil)
+      def query(origins:, destinations:, mode: nil, language: nil, avoid: nil, units: nil, departure_time: nil,
+                arrival_time: nil, transit_mode: nil, transit_routing_preference: nil, traffic_model: nil, region: nil)
         params = {
             'origins' => Convert.piped_location(origins),
             'destinations' => Convert.piped_location(destinations)
@@ -84,6 +84,10 @@ module GoogleMaps
 
         if traffic_model
           params['traffic_model'] = traffic_model
+        end
+
+        if region
+          params['region'] = region
         end
 
         self.client.request(url: "/maps/api/distancematrix/#{self.client.response_format}", params: params)
