@@ -150,7 +150,7 @@ describe Places do
                                 location: "50.9472095,4.0028986",
                                 radius: 50,
                                 language: "en",
-                                type: "locality",
+                                types: "locality",
                                 components: {'country' => 'BE'})
         ).to eq([])
       end
@@ -194,7 +194,7 @@ describe Places do
                                            location: "50.9472095,4.0028986",
                                            radius: 50,
                                            language: "en",
-                                           type: "locality",
+                                           types: "(cities)",
                                            components: {'country' => 'BE'})
 
         expect(expected_val.is_a? Nokogiri::XML::NodeSet).to eq(true)
