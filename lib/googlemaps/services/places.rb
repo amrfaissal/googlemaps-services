@@ -245,9 +245,13 @@ module GoogleMaps
 
         case self.client.response_format
         when :xml
-          self.client.request(url: "/maps/api/place/#{url_part}autocomplete/xml", params: params).xpath('//prediction')
+          self.client
+              .request(url: "/maps/api/place/#{url_part}autocomplete/xml", params: params)
+              .xpath('//prediction')
         when :json
-          self.client.request(url: "/maps/api/place/#{url_part}autocomplete/json", params: params)['predictions']
+          self.client
+              .request(url: "/maps/api/place/#{url_part}autocomplete/json", params: params)
+              .fetch('predictions', [])
         else
           raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end

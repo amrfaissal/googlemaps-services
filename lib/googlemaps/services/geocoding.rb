@@ -55,9 +55,13 @@ module GoogleMaps
 
         case self.client.response_format
         when :xml
-          self.client.request(url: '/maps/api/geocode/xml', params: params).xpath('//result')
+          self.client
+              .request(url: '/maps/api/geocode/xml', params: params)
+              .xpath('//result')
         when :json
-          self.client.request(url: '/maps/api/geocode/json', params: params)['results']
+          self.client
+              .request(url: '/maps/api/geocode/json', params: params)
+              .fetch('results', [])
         else
           raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end
@@ -107,9 +111,13 @@ module GoogleMaps
 
         case self.client.response_format
         when :xml
-          self.client.request(url: '/maps/api/geocode/xml', params: params).xpath('//result')
+          self.client
+              .request(url: '/maps/api/geocode/xml', params: params)
+              .xpath('//result')
         when :json
-          self.client.request(url: '/maps/api/geocode/json', params: params)['results']
+          self.client
+              .request(url: '/maps/api/geocode/json', params: params)
+              .fetch('results', [])
         else
           raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end

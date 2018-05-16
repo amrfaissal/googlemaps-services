@@ -34,8 +34,10 @@ module GoogleMaps
           params['interpolate'] = 'true'
         end
 
-        self.client.request(url: '/v1/snapToRoads', params: params, base_url: Constants::ROADS_BASE_URL,
-                            accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
+        self.client
+            .request(url: '/v1/snapToRoads', params: params, base_url: Constants::ROADS_BASE_URL, accepts_clientid: false,
+                     extract_body: lambda(&method(:_roads_extract)))
+            .fetch('snappedPoints', [])
       end
 
       # Returns the posted speed limit (in km/h) for given road segments.
@@ -49,8 +51,10 @@ module GoogleMaps
 
         params = {'placeId' => place_ids}
 
-        self.client.request(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
-                            accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['speedLimits']
+        self.client
+            .request(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL, accepts_clientid: false,
+                     extract_body: lambda(&method(:_roads_extract)))
+            .fetch('speedLimits', [])
       end
 
       # Returns the posted speed limit (in km/h) for given road segments.
@@ -62,8 +66,9 @@ module GoogleMaps
       def snapped_speed_limits(path:)
         params = {'path' => Convert.piped_location(path)}
 
-        self.client.request(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
-                            accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))
+        self.client
+            .request(url: '/v1/speedLimits', params: params, base_url: Constants::ROADS_BASE_URL,
+                     accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))
       end
 
       # Find the closest road segments for each point.
@@ -76,8 +81,10 @@ module GoogleMaps
       def nearest_roads(points:)
         params = {'points' => Convert.piped_location(points)}
 
-        self.client.request(url: '/v1/nearestRoads', params: params, base_url: Constants::ROADS_BASE_URL,
-                            accepts_clientid: false, extract_body: lambda(&method(:_roads_extract)))['snappedPoints']
+        self.client
+            .request(url: '/v1/nearestRoads', params: params, base_url: Constants::ROADS_BASE_URL, accepts_clientid: false,
+                     extract_body: lambda(&method(:_roads_extract)))
+            .fetch('snappedPoints', [])
       end
 
       # Extracts result from the Roads API HTTP response.

@@ -42,7 +42,7 @@ module GoogleMaps
             raise TypeError, 'Path should be either a String or an Array.'
           end
 
-          params = {'path' => path, 'samples' => samples }
+          params = {'path' => path, 'samples' => samples}
         end
 
         if path && locations
@@ -51,9 +51,13 @@ module GoogleMaps
 
         case self.client.response_format
         when :xml
-          self.client.request(url: '/maps/api/elevation/xml', params: params).xpath('//result')
+          self.client
+              .request(url: '/maps/api/elevation/xml', params: params)
+              .xpath('//result')
         when :json
-          self.client.request(url: '/maps/api/elevation/json', params: params)['results']
+          self.client
+              .request(url: '/maps/api/elevation/json', params: params)
+              .fetch('results', [])
         else
           raise StandardError, 'Unsupported response format. Should be either :json or :xml.'
         end
