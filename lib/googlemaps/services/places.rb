@@ -189,11 +189,13 @@ module GoogleMaps
       # @param [String] language The language in which to return results.
       # @param [String] types Restricts the results to places matching the specified type. The full list of supported types is available here: https://developers.google.com/places/web-service/autocomplete#place_types
       # @param [Hash] components A grouping of places to which you would like to restrict your results. Currently, you can use components to filter by up to 5 countries for example: {'country': ['US', 'AU']}
+      # @param [TrueClass,FalseClass] strict_bounds Returns only those places that are strictly within the region defined by location and radius.
       #
       # @return [Array, Nokogiri::XML::NodeSet] Array of predictions.
-      def autocomplete(input_text:, offset: nil, location: nil, radius: nil, language: nil, types: nil, components: nil)
-        _autocomplete(url_part: "", input_text: input_text, offset: offset, location: location,
-                      radius: radius, language: language, types: types, components: components)
+      def autocomplete(input_text:, offset: nil, location: nil, radius: nil, language: nil,
+                       types: nil, components: nil, strict_bounds: false)
+        _autocomplete(url_part: "", input_text: input_text, offset: offset, location: location, radius: radius,
+                      language: language, types: types, components: components, strict_bounds: strict_bounds)
       end
 
       # Returns Place predictions given a textual search query, such as "pizza near Brussels", and optional geographic bounds.
@@ -212,8 +214,8 @@ module GoogleMaps
 
       # Handler for "autocomplete" and "autocomplete_query" queries.
       # @private
-      def _autocomplete(url_part:, input_text:, offset: nil, location: nil,
-                        radius: nil, language: nil, types: nil, components: nil)
+      def _autocomplete(url_part:, input_text:, offset: nil, location: nil, radius: nil,
+                        language: nil, types: nil, components: nil, strict_bounds: false)
         params = {'input' => input_text}
 
         if offset
@@ -241,6 +243,10 @@ module GoogleMaps
             raise StandardError, 'Only country components are supported.'
           end
           params['components'] = Convert.components(components)
+        end
+
+        if strict_bounds
+          params['strictbounds'] = 'true'
         end
 
         case self.client.response_format

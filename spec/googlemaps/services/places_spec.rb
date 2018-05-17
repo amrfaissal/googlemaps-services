@@ -151,7 +151,8 @@ describe Places do
                                 radius: 50,
                                 language: "en",
                                 types: "locality",
-                                components: {'country' => 'BE'})
+                                components: {'country' => 'BE'},
+                                strict_bounds: true)
         ).to eq([])
       end
     end
