@@ -10,3 +10,4 @@
 *.gem
 /bin/
 /.idea/
+/.vscode/
