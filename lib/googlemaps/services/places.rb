@@ -148,10 +148,18 @@ module GoogleMaps
       # @param [String] language The language in which to return results.
       #
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
-      def place_details(place_id:, language: nil)
+      def place_details(place_id:, language: nil, session_token: nil, fields: nil)
         params = {'placeid' => place_id}
         if language
           params['language'] = language
+        end
+
+        if session_token
+          params['session_token'] = session_token
+        end
+
+        if fields
+          params['fields'] = fields
         end
 
         self.client.request(url: "/maps/api/place/details/#{self.client.response_format}", params: params)
@@ -193,9 +201,9 @@ module GoogleMaps
       #
       # @return [Array, Nokogiri::XML::NodeSet] Array of predictions.
       def autocomplete(input_text:, offset: nil, location: nil, radius: nil, language: nil,
-                       types: nil, components: nil, strict_bounds: false)
+                       types: nil, components: nil, strict_bounds: false, session_token: nil)
         _autocomplete(url_part: "", input_text: input_text, offset: offset, location: location, radius: radius,
-                      language: language, types: types, components: components, strict_bounds: strict_bounds)
+                      language: language, types: types, components: components, strict_bounds: strict_bounds, session_token: session_token)
       end
 
       # Returns Place predictions given a textual search query, such as "pizza near Brussels", and optional geographic bounds.
@@ -215,7 +223,7 @@ module GoogleMaps
       # Handler for "autocomplete" and "autocomplete_query" queries.
       # @private
       def _autocomplete(url_part:, input_text:, offset: nil, location: nil, radius: nil,
-                        language: nil, types: nil, components: nil, strict_bounds: false)
+                        language: nil, types: nil, components: nil, strict_bounds: false, session_token: nil)
         params = {'input' => input_text}
 
         if offset
@@ -247,6 +255,10 @@ module GoogleMaps
 
         if strict_bounds
           params['strictbounds'] = 'true'
+        end
+
+        if session_token
+          params['sessiontoken'] = session_token
         end
 
         case self.client.response_format
