@@ -88,6 +88,12 @@ describe Places do
     it 'returns details for an individual place' do
       expect(places.place_details(place_id: 'ChIJZ2jHc-2kw0cRpwJzeGY6i8E', language: "en")).to eq({})
     end
+
+    it 'returns passes any provided parameters to the api' do
+      client.response_format = :json
+      expect(client).to receive(:request).with(url: "/maps/api/place/details/json", params: { "placeid" => "ChIJZ2jHc-2kw0cRpwJzeGY6i8E", language: "en", fields: "address_component,geometry" })
+      expect(places.place_details(place_id: 'ChIJZ2jHc-2kw0cRpwJzeGY6i8E', language: "en", fields: "address_component,geometry" )).to eq({})
+    end
   end
 
   describe '#place_photo' do
