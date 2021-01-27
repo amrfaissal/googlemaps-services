@@ -148,13 +148,10 @@ module GoogleMaps
       # @param [String] language The language in which to return results.
       #
       # @return [Hash, Nokogiri::XML::Document] Valid JSON or XML response.
-      def place_details(place_id:, language: nil)
+      def place_details(place_id:, **additional_parameters)
         params = {'placeid' => place_id}
-        if language
-          params['language'] = language
-        end
 
-        self.client.request(url: "/maps/api/place/details/#{self.client.response_format}", params: params)
+        self.client.request(url: "/maps/api/place/details/#{self.client.response_format}", params: params.merge(additional_parameters))
       end
 
       # Downloads a photo from the Places API.
